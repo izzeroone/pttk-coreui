@@ -8,7 +8,33 @@ export default {
         variant: 'info',
         text: 'NEW',
       },
-    },
+    },{
+          title: true,
+          name: 'Chức năng',
+          wrapper: {
+              element: '',
+              attributes: {},
+          },
+      },{
+          name: 'Cơ sở sản xuất',
+          url: '/forms/cososanxuat',
+          icon: 'icon-puzzle',
+      },
+      {
+          name: 'Tiêu chuẩn chất lượng',
+          url: '/forms/tieuchuan',
+          icon: 'icon-puzzle',
+      },
+      {
+          name: 'Đăng ký sản phẩm',
+          url: '/forms/dangky',
+          icon: 'icon-puzzle',
+      },
+      {
+          name: 'Kiểm tra sản phẩm',
+          url: '/forms/kiemtra',
+          icon: 'icon-puzzle',
+      },
     {
       title: true,
       name: 'Theme',
@@ -35,11 +61,7 @@ export default {
         element: '',
         attributes: {},
       },
-    },{
-      name: 'Tiêu chuẩn chất lượng',
-      url: '/forms/tieuchuan',
-      icon: 'icon-puzzle',
-      },
+    },
     {
       name: 'Base',
       url: '/base',

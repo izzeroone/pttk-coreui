@@ -1,0 +1,6 @@
+{
+  "name": "KiemTraSanPham",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./KiemTraSanPham.js"
+}

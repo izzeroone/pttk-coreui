@@ -171,8 +171,23 @@ const Widgets = Loadable({
   loading: Loading,
 });
 
-const ChatLuong = Loadable({
-    loader: () => import('./views/ChatLuong/ChatLuong'),
+const TieuChuan = Loadable({
+    loader: () => import('./forms/TieuChuan'),
+    loading: Loading,
+});
+
+const DangKySanPham = Loadable({
+    loader: () => import('./forms/DangKySanPham'),
+    loading: Loading,
+});
+
+const KiemTraSanPham = Loadable({
+    loader: () => import('./forms/KiemTraSanPham'),
+    loading: Loading,
+});
+
+const CoSoSanXuat = Loadable({
+    loader: () => import('./forms/CoSoSanXuat'),
     loading: Loading,
 });
 
@@ -218,7 +233,10 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', component: Modals },
   { path: '/widgets', name: 'Widgets', component: Widgets },
   { path: '/charts', name: 'Charts', component: Charts },
-    { path: '/forms/tieuchuan', name: 'Quản lý tiêu chuẩn', component: ChatLuong },
+    { path: '/forms/tieuchuan', name: 'Quản lý tiêu chuẩn', component: TieuChuan },
+    { path: '/forms/cososanxuat', name: 'Cơ sở sản xuất', component: CoSoSanXuat },
+    { path: '/forms/dangky', name: 'Đăng ký sản phẩm', component: DangKySanPham },
+    { path: '/forms/kiemtra', name: 'Kiểm tra sản phẩm', component: KiemTraSanPham}
 ];
 
 export default routes;

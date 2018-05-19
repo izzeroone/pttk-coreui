@@ -1,0 +1,6 @@
+{
+  "name": "Dang Ky San Pham",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./DangKySanPham.js"
+}

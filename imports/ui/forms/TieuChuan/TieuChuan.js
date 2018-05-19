@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Badge, Card, CardBody, CardHeader, Col, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, Row, TabContent, TabPane } from 'reactstrap';
 
-class ChatLuong extends Component {
+class TieuChuan extends Component {
 
     constructor(props) {
         super(props);
@@ -82,4 +82,4 @@ class ChatLuong extends Component {
     }
 }
 
-export default ChatLuong;
+export default TieuChuan;
