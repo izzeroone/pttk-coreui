@@ -115,6 +115,8 @@
         <item url="file://$USER_HOME$/AppData/Local/.meteor/packages/modules/0.11.7/web.browser/reify.js" />
         <item url="file://$USER_HOME$/AppData/Local/.meteor/packages/modules/0.11.7/web.browser/server.js" />
         <item url="file://$USER_HOME$/AppData/Local/.meteor/packages/modules/0.11.7/web.browser/stubs.js" />
+        <item url="file://$USER_HOME$/AppData/Local/.meteor/packages/momentjs_moment/2.22.1/web.browser/export.js" />
+        <item url="file://$USER_HOME$/AppData/Local/.meteor/packages/momentjs_moment/2.22.1/web.browser/moment.js" />
         <item url="file://$USER_HOME$/AppData/Local/.meteor/packages/mongo-dev-server/1.1.0/web.browser/server.js" />
         <item url="file://$USER_HOME$/AppData/Local/.meteor/packages/mongo-id/1.0.7/web.browser/id.js" />
         <item url="file://$USER_HOME$/AppData/Local/.meteor/packages/observe-sequence/1.0.16/web.browser/observe_sequence.js" />
@@ -291,6 +293,8 @@
       <root url="file://$USER_HOME$/AppData/Local/.meteor/packages/modules/0.11.7/web.browser/reify.js" />
       <root url="file://$USER_HOME$/AppData/Local/.meteor/packages/modules/0.11.7/web.browser/server.js" />
       <root url="file://$USER_HOME$/AppData/Local/.meteor/packages/modules/0.11.7/web.browser/stubs.js" />
+      <root url="file://$USER_HOME$/AppData/Local/.meteor/packages/momentjs_moment/2.22.1/web.browser/export.js" />
+      <root url="file://$USER_HOME$/AppData/Local/.meteor/packages/momentjs_moment/2.22.1/web.browser/moment.js" />
       <root url="file://$USER_HOME$/AppData/Local/.meteor/packages/mongo-dev-server/1.1.0/web.browser/server.js" />
       <root url="file://$USER_HOME$/AppData/Local/.meteor/packages/mongo-id/1.0.7/web.browser/id.js" />
       <root url="file://$USER_HOME$/AppData/Local/.meteor/packages/observe-sequence/1.0.16/web.browser/observe_sequence.js" />

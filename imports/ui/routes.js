@@ -172,7 +172,7 @@ const Widgets = Loadable({
 });
 
 const TieuChuan = Loadable({
-    loader: () => import('./forms/TieuChuan'),
+    loader: () => import('./forms/TieuChuan/TieuChuanForm'),
     loading: Loading,
 });
 

@@ -1,5 +1,5 @@
 import {TieuChuanDB, LoaiSanPhamDB} from "../../../collections/collections";
-import TieuChuan from "./TieuChuan";
+import TieuChuanForm from "./TieuChuanForm";
 
 class Controller {
     x = 123;
@@ -10,7 +10,7 @@ class Controller {
         TieuChuanDB.update(MaTieuChuan, {Delete: true});
     }
     addTieuChuan = (TieuChuan) => {
-        TieuChuanDB.insert(TieuChuan);
+        return TieuChuanDB.insert(TieuChuan);
     }
     getTatCaLoaiSanPham = () => {
         return LoaiSanPhamDB.find({Delete: false}).fetch();
@@ -20,6 +20,9 @@ class Controller {
     }
     deleteTieuChuan = (MaTieuChuan) => {
         TieuChuanDB.update(MaTieuChuan, {Delete: true});
+    }
+    upsertTieuChuan = (TieuChuan) => {
+        TieuChuanDB.upsert(TieuChuan._id, TieuChuan);
     }
 }
 
