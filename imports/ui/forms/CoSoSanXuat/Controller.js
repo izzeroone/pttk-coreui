@@ -1,6 +1,13 @@
+import {TieuChuanDB} from "../../../collections/collections";
 
-export default class CSSXController {
-    addFunction(cssx){
-        do_something();
+class Controller {
+    addTieuChuan(TieuChuan){
+        TieuChuanDB.insert(TieuChuan);
+    }
+    getAllTieuChuan(){
+        return TieuChuanDB.find().fetch();
     }
 }
+
+export default TieuChuanController = new Controller();
+
