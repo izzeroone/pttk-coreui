@@ -32,8 +32,34 @@ class TieuChuanForm extends Component {
     constructor(props) {
         super(props);
 
+        this.dummyTieuChuan = {
+            TenTieuChuan: "Tên tiêu chuẩn",
+                MaLoaiSanPham: "CH",
+                NgayBatDauHieuLuc: moment("20140202").format("YYYY-MM-DD"),
+                NgayHetHieuLuc: moment("20190202").format("YYYY-MM-DD"),
+                DanhSachChiTieu: [{
+                TenChiTieu: "Tên chỉ tiêu",
+                LoaiChiTieu: "LESS",
+                GioiHanTren: "100",
+                DonVi: "mg/hh",
+                MoTa: "Mô tả chỉ tiêu"
+            }],
+                Delete: false
+        };
+
+        this.dummyChiTieu = {
+            TenChiTieu: "Hàm lượng Sắt",
+            LoaiChiTieu: "KVQ",
+            GioiHanTren: "100",
+            DonViDo: "mg/hh",
+            GhiChu:"Hàm lượng sắt không được vượt quá"
+        };
+
         this.state = {
-            addedIndex: -1,
+            addedTieuChuanIndex: null,
+            addedTieuChuanUpdated: true,
+            addedChiTieuIndex: null,
+            addedChiTieuUpdated: true,
             deleteModalShown: false,
             chiTieuModalShown: false,
             currentTieuChuanIndex: null,
@@ -42,20 +68,6 @@ class TieuChuanForm extends Component {
             currentLoaiChiTieu: null,
             danhSachTieuChuan: null,
             danhSachLoaiSanPham: null,
-            dumbTieuChuan: {
-                TenTieuChuan: "Tên tiêu chuẩn",
-                MaLoaiSanPham: "CH",
-                NgayBatDauHieuLuc: moment("20140202").format("YYYY-MM-DD"),
-                NgayHetHieuLuc: moment("20190202").format("YYYY-MM-DD"),
-                DanhSachChiTieu: [{
-                    TenChiTieu: "Tên chỉ tiêu",
-                    LoaiChiTieu: "LESS",
-                    GioiHanTren: "100",
-                    DonVi: "mg/hh",
-                    MoTa: "Mô tả chỉ tiêu"
-                }],
-                Delete: false
-            }
         };
     }
 
@@ -187,11 +199,13 @@ class TieuChuanForm extends Component {
 
     }
 
+
     renderDanhSachTieuChuan = () => {
         let shownDeleteModal = (index) => {
             this.setState({
                 deleteModalShown: !this.state.deleteModalShown,
-                currentTieuChuanIndex: index
+                currentTieuChuanIndex: index,
+                currentTieuChuan: this.state.danhSachTieuChuan[index]
             })
         };
         if (this.state.danhSachTieuChuan && this.state.danhSachTieuChuan.length != 0) {
@@ -308,9 +322,7 @@ class TieuChuanForm extends Component {
                                     Danh sách chỉ tiêu
                                     <div className="card-header-actions">
                                         <Button size="sm" color="success" className="btn-pill"
-                                                onClick={() => this.setState({
-                                                    chiTieuModalShown: true
-                                                })}><span
+                                                onClick={() => this.addChiTieu()}><span
                                             style={{fontSize: "4"}}>Thêm</span></Button>
                                     </div>
                                 </CardHeader>
@@ -359,7 +371,7 @@ class TieuChuanForm extends Component {
                         break;
                     case "NG":
                         TenLoaiChiTieu = "Nằm giữa"
-                        GiaTriChiTieu = ">=" + item.GioHanDuoi + "\n" + "<=" + item.GioiHanTren;
+                        GiaTriChiTieu = ">=" + item.GioiHanDuoi + "\n" + "<=" + item.GioiHanTren;
                         DonViDo = item.DonViDo;
                         break;
                     case "KVQ":
@@ -509,15 +521,49 @@ class TieuChuanForm extends Component {
 
     addTieuChuan = () => {
         //Thêm mới mà chưa cập nhật thì ko cho thêm
-        if (this.state.addedIndex != -1) {
+        if (this.state.addedTieuChuanUpdated === false) {
+            this.refs.notify.notificationAlert({
+                place: 'br',
+                message: (
+                    <div>
+                        Bạn chưa cập nhật tiêu chuẩn mới thêm
+                    </div>
+                ),
+                type: "warning",
+                icon: "now-ui-icons ui-1_bell-53",
+                autoDismiss: 4
+            })
             return;
         }
         this.setState({
-            isAdded: this.state.danhSachTieuChuan.length
+            addedTieuChuanUpdated: false,
+            addedTieuChuanIndex: this.state.danhSachTieuChuan.length
         });
-        console.log(TieuChuanController.addTieuChuan(this.state.dumbTieuChuan));
-        //Set the last
+        console.log(TieuChuanController.addTieuChuan(this.dummyTieuChuan));
     }
+
+    addChiTieu = () => {
+        //Thêm mới mà chưa cập nhật thì ko cho thêm
+        if (this.state.addedChiTieuUpdated === false) {
+            this.refs.notify.notificationAlert({
+                place: 'br',
+                message: (
+                    <div>
+                        Bạn chưa cập nhật chỉ tiêu mới thêm
+                    </div>
+                ),
+                type: "warning",
+                icon: "now-ui-icons ui-1_bell-53",
+                autoDismiss: 4
+            });
+            return;
+        }
+        this.setState({
+            addedChiTieuUpdated: false,
+            addedChiTieuIndex: this.state.currentTieuChuan.DanhSachChiTieu.length
+        });
+        this.state.currentTieuChuan.DanhSachChiTieu.push(this.dummyChiTieu);
+    };
 
     updateChiTieu = (e) => {
         let ChiTieu = {};
@@ -560,9 +606,9 @@ class TieuChuanForm extends Component {
         this.state.currentTieuChuan.MaLoaiSanPham = e.target.cbMaLoaiSanPham.value;
         this.state.currentTieuChuan.NgayBatDauHieuLuc = e.target.dpNgayBatDauHieuLuc.value;
         this.state.currentTieuChuan.NgayHetHieuLuc = e.target.dpNgayHetHieuLuc.value;
-        if(this.state.addedIndex === this.state.currentTieuChuanIndex){
+        if(this.state.addedTieuChuanIndex === this.state.currentTieuChuanIndex){
             this.setState({
-                isAdded: -1
+                addedTieuChuanUpdated: true
             });
         }
         TieuChuanController.upsertTieuChuan(this.state.currentTieuChuan);
