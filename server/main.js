@@ -16,15 +16,20 @@ Meteor.startup(() => {
         NgayHetHieuLuc: moment("20190202").format("YYYY-MM-DD"),
         DanhSachChiTieu :[{
         TenChiTieu: "Hàm lượng Protein",
-            LoaiChiTieu: "Vượt quá",
+            LoaiChiTieu: "VQ",
             GioiHanDuoi: "100",
-            DonVi: "mg/hh",
+            DonViDo: "mg/hh",
             MoTa:"Hàm lượng protein không được vượt quá"
         },{
             TenChiTieu: "Hàm lượng Sắt",
-            LoaiChiTieu: "Không vượt quá",
+            LoaiChiTieu: "KVQ",
             GioiHanTren: "100",
-            DonVi: "mg/hh",
+            DonViDo: "mg/hh",
+            GhiChu:"Hàm lượng protein không được vượt quá"
+        },{
+            TenChiTieu: "SOMEHING",
+            LoaiChiTieu: "MT",
+            MoTa: "Mo ta cai gi do",
             GhiChu:"Hàm lượng protein không được vượt quá"
         },],
         Delete: false

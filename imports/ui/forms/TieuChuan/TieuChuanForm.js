@@ -25,6 +25,8 @@ import {
 } from 'reactstrap';
 import {Tracker} from 'meteor/tracker'
 import TieuChuanController from './Controller'
+import $ from 'jquery'
+import NotificationAlert from "react-notification-alert";
 
 class TieuChuanForm extends Component {
     constructor(props) {
@@ -34,9 +36,10 @@ class TieuChuanForm extends Component {
             addedIndex: -1,
             deleteModalShown: false,
             chiTieuModalShown: false,
-            modifiedTieuChuanIndex: null,
-            modifiedTieuChuan: null,
-            selectedChiTieuIndex: null,
+            currentTieuChuanIndex: null,
+            currentTieuChuan: null,
+            currentChiTieuIndex: null,
+            currentLoaiChiTieu: null,
             danhSachTieuChuan: null,
             danhSachLoaiSanPham: null,
             dumbTieuChuan: {
@@ -66,9 +69,8 @@ class TieuChuanForm extends Component {
         })
     }
 
-
     renderDeleteModal = () => {
-        if (this.state.modifiedTieuChuan === null) {
+        if (this.state.currentTieuChuan === null) {
             return
         }
 
@@ -81,13 +83,13 @@ class TieuChuanForm extends Component {
             <ModalHeader toggle={this.toggleDanger}>Xác nhận xóa</ModalHeader>
             <ModalBody>
                 Bạn chắc chắn có muốn xóa tiêu
-                chuẩn {this.state.modifiedTieuChuan.TenTieuChuan}
+                chuẩn {this.state.currentTieuChuan.TenTieuChuan}
             </ModalBody>
             <ModalFooter>
                 <Button color="danger" onClick={() => {
-                    TieuChuanController.deleteTieuChuan(this.state.modifiedTieuChuan._id)
-                    this.setState({modifiedTieuChuan: null,
-                        modifiedTieuChuanIndex: null})
+                    TieuChuanController.deleteTieuChuan(this.state.currentTieuChuan._id)
+                    this.setState({currentTieuChuan: null,
+                        currentTieuChuanIndex: null})
                     toggleDeleteModal()
                 }}>Xóa</Button>{' '}
                 <Button color="secondary" onClick={() => toggleDeleteModal()}>Hủy</Button>
@@ -96,12 +98,17 @@ class TieuChuanForm extends Component {
 
     }
 
+    toggleChiTieuModal = () => {
+        this.setState({chiTieuModalShown: !this.state.chiTieuModalShown})
+    }
+
     renderChiTieuModal = () => {
-        let toggleChiTieuModal = () => {
-            this.setState({chiTieuModalShown: !this.state.chiTieuModalShown})
-        }
-        return (<Modal isOpen={this.state.chiTieuModalShown} toggle={toggleChiTieuModal}
-                       className={'modal-success ' + this.props.className}>
+        return (
+            <div>
+                <Label value="Stupid label"/>
+            <Modal isOpen={this.state.chiTieuModalShown} toggle={this.toggleChiTieuModal}
+                       className={'modal-success'} id={"ChiTieuModal"}
+                   onOpened={() => this.selectChiTieu(this.state.currentChiTieuIndex)}>
             <ModalHeader toggle={this.toggleDanger}>Cập nhật chỉ tiêu</ModalHeader>
             <ModalBody>
                 <Form action="" method="post" encType="multipart/form-data" className="form-horizontal" onSubmit={this.updateTieuChuan}>
@@ -110,7 +117,7 @@ class TieuChuanForm extends Component {
                             <Label htmlFor="text-input">Tên chỉ tiêu</Label>
                         </Col>
                         <Col xs="12" md="9">
-                            <Input type="text" id="txtTenChiTieu" name="text-input" placeholder="Text"/>
+                            <Input type="text" id="txtTenChiTieu" name="text-input" ref="txtTenChiTieu"/>
                             <FormText color="muted">Nhập tên của chỉ tiêu</FormText>
                         </Col>
                     </FormGroup>
@@ -119,44 +126,46 @@ class TieuChuanForm extends Component {
                             <Label htmlFor="select">Phân loại chỉ tiêu</Label>
                         </Col>
                         <Col xs="12" md="9">
-                            <Input type="select" name="select" id="cbMaLoaiSanPham">
-                                <option>Mô tả</option>
-                                <option>Nằm giữa</option>
-                                <option>Vượt quá</option>
-                                <option>Không vượt quá</option>
+                            <Input type="select" name="select" id="cbLoaiChiTieu" onChange={(e) => {
+                                this.setState({currentLoaiChiTieu: e.target.value})
+                                this.displayRelevantChiTieuInfo(e.target.value)}}>
+                                <option value={"MT"}>Mô tả</option>
+                                <option value={"NG"}>Nằm giữa</option>
+                                <option value={"VQ"}>Vượt quá</option>
+                                <option value={"KVQ"}>Không vượt quá</option>
                             </Input>
                         </Col>
                     </FormGroup>
-                    <FormGroup row>
+                    <FormGroup row id="fgMoTa">
                         <Col md="3">
                             <Label htmlFor="date-input">Mô tả</Label>
                         </Col>
                         <Col xs="12" md="9">
-                            <Input type="text" id="txtTenChiTieu" name="text-input" placeholder="Text"/>
+                            <Input type="text" id="txtMoTa" name="text-input"/>
                         </Col>
                     </FormGroup>
-                    <FormGroup row>
+                   <FormGroup row id="fgGioiHanTren">
                         <Col md="3">
                             <Label htmlFor="date-input">Giới hạn trên</Label>
                         </Col>
                         <Col xs="12" md="9">
-                            <Input type="text" id="txtGioiHanTren" name="text-input" placeholder="Text"/>
+                            <Input type="number" step="1" id="txtGioiHanTren" name="number-input"/>
                         </Col>
                     </FormGroup>
-                    <FormGroup row>
+                    <FormGroup row id="fgGioiHanDuoi">
                         <Col md="3">
                             <Label htmlFor="date-input">Giới hạn dưới</Label>
                         </Col>
                         <Col xs="12" md="9">
-                            <Input type="text" id="txtGioiHanDuoi" name="text-input" placeholder="Text"/>
+                            <Input type="number" step="1" id="txtGioiHanDuoi" name="number-input"/>
                         </Col>
                     </FormGroup>
-                    <FormGroup row>
+                    <FormGroup row id="fgDonViDo">
                         <Col md="3">
                             <Label htmlFor="date-input">Đơn vị đo</Label>
                         </Col>
                         <Col xs="12" md="9">
-                            <Input type="text" id="txtDonViDo" name="text-input" placeholder="Text"/>
+                            <Input type="text" id="txtDonViDo" name="text-input"/>
                         </Col>
                     </FormGroup>
                     <FormGroup row>
@@ -164,21 +173,17 @@ class TieuChuanForm extends Component {
                             <Label htmlFor="date-input">Ghi chú</Label>
                         </Col>
                         <Col xs="12" md="9">
-                            <Input type="text" id="txtGhiChu" name="text-input" placeholder="Text"/>
+                            <Input type="text" id="txtGhiChu" name="text-input"/>
                         </Col>
                     </FormGroup>
-                    <Button type="submit" size="sm" color="primary"><i
-                        className="fa fa-dot-circle-o"/> Cập nhật</Button>
-                    <Button type="reset" size="sm" color="danger"><i
-                        className="fa fa-ban"/> Làm trống</Button>
-
                 </Form>
             </ModalBody>
             <ModalFooter>
-                <Button color="success" onClick={() => {}}>Xóa</Button>
-                <Button color="secondary" onClick={() => toggleChiTieuModal()}>Hủy</Button>
+                <Button color="success" onClick={(e) => {this.updateChiTieu(e); this.toggleChiTieuModal();}}>Cập nhật</Button>
+                <Button color="secondary" onClick={() => this.toggleChiTieuModal()}>Hủy</Button>
             </ModalFooter>
-        </Modal>)
+        </Modal>
+            </div>)
 
     }
 
@@ -186,13 +191,13 @@ class TieuChuanForm extends Component {
         let shownDeleteModal = (index) => {
             this.setState({
                 deleteModalShown: !this.state.deleteModalShown,
-                modifiedTieuChuanIndex: index
+                currentTieuChuanIndex: index
             })
         };
         if (this.state.danhSachTieuChuan && this.state.danhSachTieuChuan.length != 0) {
             return this.state.danhSachTieuChuan.map((item, index) => {
                 return (
-                    <tr>
+                    <tr key={index}>
                         <td>{item.TenTieuChuan}</td>
                         <td>{TieuChuanController.getTenSanPham(item.MaLoaiSanPham).TenLoaiSanPham}</td>
                         <td>
@@ -204,7 +209,7 @@ class TieuChuanForm extends Component {
                             }
                         </td>
                         <td>
-                            <Button size="sm" color="warning" className="btn-pill"
+                            <Button size="sm" color="primary" className="btn-pill"
                                     onClick={() => this.selectTieuChuan(index)}><span
                                 style={{fontSize: "4"}}>Sửa</span></Button>
                             <Button size="sm" color="danger" className="btn-pill"
@@ -223,13 +228,13 @@ class TieuChuanForm extends Component {
     renderDanhSachLoaiSanPham = () => {
         if (this.state.danhSachLoaiSanPham) {
             return this.state.danhSachLoaiSanPham.map((item, index) => {
-                return (<option value={item._id}>{item.TenLoaiSanPham}</option>)
+                return (<option value={item._id} key={item._id}>{item.TenLoaiSanPham}</option>)
             });
         }
     }
 
     renderTieuChuan = () => {
-        if (this.state.modifiedTieuChuan === null) {
+        if (this.state.currentTieuChuan === null) {
             return (
                 <Card>
                     <CardHeader>
@@ -241,14 +246,16 @@ class TieuChuanForm extends Component {
                 </Card>
             )
         }
-        let TieuChuan = this.state.modifiedTieuChuan;
+        let TieuChuan = this.state.currentTieuChuan;
         return (
             <Card>
                 <CardHeader>
                     <strong>Chi tiết tiêu chuẩn</strong>
                 </CardHeader>
                 <CardBody>
-                    <Form action="" method="post" encType="multipart/form-data" className="form-horizontal" onSubmit={this.updateTieuChuan}>
+                    <Form action="" method="post" encType="multipart/form-data" className="form-horizontal"
+                          onSubmit={this.updateTieuChuan}
+                          onReset={this.resetCurrentTieuChuan}>
                         <FormGroup row>
                             <Col md="3">
                                 <Label>ID</Label>
@@ -323,27 +330,13 @@ class TieuChuanForm extends Component {
                                         {this.renderDanhSachChiTieu(TieuChuan.DanhSachChiTieu)}
                                         </tbody>
                                     </Table>
-                                    {/*<nav>*/}
-                                        {/*<Pagination>*/}
-                                            {/*<PaginationItem><PaginationLink previous*/}
-                                                                            {/*tag="button">Prev</PaginationLink></PaginationItem>*/}
-                                            {/*<PaginationItem active>*/}
-                                                {/*<PaginationLink tag="button">1</PaginationLink>*/}
-                                            {/*</PaginationItem>*/}
-                                            {/*<PaginationItem><PaginationLink tag="button">2</PaginationLink></PaginationItem>*/}
-                                            {/*<PaginationItem><PaginationLink tag="button">3</PaginationLink></PaginationItem>*/}
-                                            {/*<PaginationItem><PaginationLink tag="button">4</PaginationLink></PaginationItem>*/}
-                                            {/*<PaginationItem><PaginationLink next*/}
-                                                                            {/*tag="button">Next</PaginationLink></PaginationItem>*/}
-                                        {/*</Pagination>*/}
-                                    {/*</nav>*/}
                                 </CardBody>
                             </Card>
                         </FormGroup>
                         <Button type="submit" size="sm" color="primary"><i
                             className="fa fa-dot-circle-o"></i> Cập nhật</Button>
                         <Button type="reset" size="sm" color="danger"><i
-                            className="fa fa-ban"></i> Làm trống</Button>
+                            className="fa fa-ban"></i>Đặt lại</Button>
                     </Form>
                 </CardBody>
                 <CardFooter>
@@ -357,47 +350,48 @@ class TieuChuanForm extends Component {
             return danhSachChiTieu.map((item, index) => {
                 let TenLoaiChiTieu = null;
                 let GiaTriChiTieu = null;
-                let DonVi = null;
+                let DonViDo = null;
                 switch (item.LoaiChiTieu) {
-                    case 'Mô tả':
+                    case "MT":
                         TenLoaiChiTieu = "Mô tả"
                         GiaTriChiTieu = item.MoTa
-                        DonVi = "Không có"
+                        DonViDo = "Không có"
                         break;
-                    case 'Nằm giữa':
+                    case "NG":
                         TenLoaiChiTieu = "Nằm giữa"
                         GiaTriChiTieu = ">=" + item.GioHanDuoi + "\n" + "<=" + item.GioiHanTren;
-                        DonVi = item.DonVi
+                        DonViDo = item.DonViDo;
                         break;
-                    case 'Không vượt quá':
+                    case "KVQ":
                         TenLoaiChiTieu = "Không vượt quá"
                         GiaTriChiTieu = "<=" + item.GioiHanTren;
-                        DonVi = item.DonVi
+                        DonViDo = item.DonViDo;
                         break;
-                    case 'Vượt quá':
+                    case "VQ":
                         TenLoaiChiTieu = "Vượt quá"
                         GiaTriChiTieu = ">=" + item.GioiHanDuoi;
-                        DonVi = item.DonVi
+                        DonViDo = item.DonViDo;
                         break;
-
                 }
                 return (
-                    <tr>
+                    <tr key={index}>
                         <td>{item.TenChiTieu}</td>
                         <td>{TenLoaiChiTieu}</td>
                         <td>{GiaTriChiTieu}</td>
-                        <td>{DonVi}</td>
+                        <td>{DonViDo}</td>
                         <td>{item.GhiChu}</td>
                         <td>
-                            <Button size="sm" color="warning" className="btn-pill"
-                                    onClick={() => this.setState({
-                                        selectedChiTieuIndex: index,
+                            <Button size="sm" color="primary" className="btn-pill"
+                                    onClick={() => {
+                                        this.setState({
+                                        currentChiTieuIndex: index,
                                         chiTieuModalShown: true
-                                    })}><span
+                                    })
+                                    }}><span
                                 style={{fontSize: "4"}}>Sửa</span></Button>
                             <Button size="sm" color="danger" className="btn-pill"
                             onClick={() => {
-                                this.state.modifiedTieuChuan.DanhSachChiTieu.splice(index, 1);
+                                this.state.currentTieuChuan.DanhSachChiTieu.splice(index, 1);
                                 this.forceUpdate()}}><span
                                 style={{fontSize: "4"}}>Xóa</span></Button>
                         </td>
@@ -411,6 +405,7 @@ class TieuChuanForm extends Component {
     render() {
         return (
             <div className="animated fadeIn">
+                <NotificationAlert ref="notify" />
                 {this.renderDeleteModal()}
                 {this.renderChiTieuModal()}
                 <Row>
@@ -438,20 +433,6 @@ class TieuChuanForm extends Component {
                                     {this.renderDanhSachTieuChuan()}
                                     </tbody>
                                 </Table>
-                                <nav>
-                                    <Pagination>
-                                        <PaginationItem><PaginationLink previous
-                                                                        tag="button">Prev</PaginationLink></PaginationItem>
-                                        <PaginationItem active>
-                                            <PaginationLink tag="button">1</PaginationLink>
-                                        </PaginationItem>
-                                        <PaginationItem><PaginationLink tag="button">2</PaginationLink></PaginationItem>
-                                        <PaginationItem><PaginationLink tag="button">3</PaginationLink></PaginationItem>
-                                        <PaginationItem><PaginationLink tag="button">4</PaginationLink></PaginationItem>
-                                        <PaginationItem><PaginationLink next
-                                                                        tag="button">Next</PaginationLink></PaginationItem>
-                                    </Pagination>
-                                </nav>
                             </CardBody>
                         </Card>
                     </Col>
@@ -468,14 +449,63 @@ class TieuChuanForm extends Component {
     selectTieuChuan = (index) => {
         let modifiedTieuChuan = this.state.danhSachTieuChuan[index];
         this.setState({
-            modifiedTieuChuanIndex: index,
-            modifiedTieuChuan: modifiedTieuChuan
+            currentTieuChuanIndex: index,
+            currentTieuChuan: modifiedTieuChuan
         });
-        document.getElementById("txtTenTieuChuan").value = modifiedTieuChuan.TenTieuChuan;
-        document.getElementById("cbMaLoaiSanPham").value = modifiedTieuChuan.MaLoaiSanPham;
-        document.getElementById("dpNgayBatDauHieuLuc").value = modifiedTieuChuan.NgayBatDauHieuLuc;
-        document.getElementById("dpNgayHetHieuLuc").value = modifiedTieuChuan.NgayHetHieuLuc;
+        console.log(`Tien chuan thu ${index} da duoc chon`);
+        $("#txtTenTieuChuan").val(modifiedTieuChuan.TenTieuChuan);
+        $("#cbMaLoaiSanPham").val(modifiedTieuChuan.MaLoaiSanPham);
+        $("#dpNgayBatDauHieuLuc").val(modifiedTieuChuan.NgayBatDauHieuLuc);
+        $("#dpNgayHetHieuLuc").val(modifiedTieuChuan.NgayHetHieuLuc);
     };
+
+    selectChiTieu = (index) => {
+        console.log(`Chi tieu thu ${index} da duoc chon`);
+        let currentChiTieu = this.state.currentTieuChuan.DanhSachChiTieu[index];
+        this.setState({
+            currentLoaiChiTieu: currentChiTieu.LoaiChiTieu
+        });
+        //Get element render before dom
+        this.displayRelevantChiTieuInfo(currentChiTieu.LoaiChiTieu);
+
+        $("#txtTenChiTieu").val(currentChiTieu.TenChiTieu);
+        $("#cbLoaiChiTieu").val(currentChiTieu.LoaiChiTieu);
+        $("#txtMoTa").val(currentChiTieu.MoTa);
+        $("#txtGioiHanTren").val(currentChiTieu.GioiHanTren);
+        $("#txtGioiHanDuoi").val(currentChiTieu.GioiHanDuoi);
+        $("#txtDonViDo").val(currentChiTieu.DonViDo);
+        $("#txtGhiChu").val(currentChiTieu.GhiChu);
+    };
+
+    displayRelevantChiTieuInfo = (LoaiChiTieu) => {
+        console.log(this.state.currentLoaiChiTieu);
+        switch (LoaiChiTieu){
+            case "MT":
+                $("#fgMoTa").show();
+                $("#fgGioiHanTren").hide();
+                $("#fgGioiHanDuoi").hide();
+                $("#fgDonViDo").hide();
+                break;
+            case  "NG":
+                $("#fgMoTa").hide();
+                $("#fgGioiHanTren").show();
+                $("#fgGioiHanDuoi").show();
+                $("#fgDonViDo").show();
+                break;
+            case "VQ":
+                $("#fgMoTa").hide();
+                $("#fgGioiHanTren").hide();
+                $("#fgGioiHanDuoi").show();
+                $("#fgDonViDo").show();
+                break;
+            case "KVQ":
+                $("#fgMoTa").hide();
+                $("#fgGioiHanTren").show();
+                $("#fgGioiHanDuoi").hide();
+                $("#fgDonViDo").show();
+                break;
+        }
+    }
 
     addTieuChuan = () => {
         //Thêm mới mà chưa cập nhật thì ko cho thêm
@@ -489,19 +519,74 @@ class TieuChuanForm extends Component {
         //Set the last
     }
 
+    updateChiTieu = (e) => {
+        let ChiTieu = {};
+        ChiTieu.TenChiTieu = $("#txtTenChiTieu").val();
+        ChiTieu.LoaiChiTieu = $("#cbLoaiChiTieu").val();
+        ChiTieu.GhiChu = $("#txtGhiChu").val();
+        ChiTieu.MoTa = $("#txtMoTa").val();
+        ChiTieu.GioiHanTren = $("#txtGioiHanTren").val();
+        ChiTieu.GioiHanDuoi = $("#txtGioiHanDuoi").val();
+        ChiTieu.DonViDo = $("#txtDonViDo").val();
+        // switch (ChiTieu.LoaiChiTieu) {
+        //     case "MT":
+        //         ChiTieu.MoTa = $("#txtMoTa").val();
+        //         break;
+        //     case "NG:":
+        //         ChiTieu.GioiHanTren = $("#txtGioiHanTren").val();
+        //         ChiTieu.GioiHanDuoi = $("#txtGioiHanDuoi").val();
+        //         ChiTieu.DonViDo = $("#txtDonViDo").val();
+        //         break;
+        //     case "KVQ":
+        //         ChiTieu.GioiHanTren = $("#txtGioiHanTren").val();
+        //         ChiTieu.DonViDo = $("#txtDonViDo").val();
+        //         break;
+        //     case "VQ":
+        //         ChiTieu.GioiHanDuoi = $("#txtGioiHanDuoi").val();
+        //         ChiTieu.DonViDo = $("#txtDonViDo").val();
+        //         break;
+        // }
+        let currentTieuChuan = this.state.currentTieuChuan;
+        currentTieuChuan.DanhSachChiTieu[this.state.currentChiTieuIndex] = ChiTieu;
+        this.setState({
+            currentTieuChuan : currentTieuChuan
+        })
+        console.log(this.state.currentTieuChuan);
+    }
+
     updateTieuChuan = (e) => {
         e.preventDefault();
-        this.state.modifiedTieuChuan.TenTieuChuan = e.target.txtTenTieuChuan.value;
-        this.state.modifiedTieuChuan.MaLoaiSanPham = e.target.cbMaLoaiSanPham.value;
-        this.state.modifiedTieuChuan.NgayBatDauHieuLuc = e.target.dpNgayBatDauHieuLuc.value;
-        this.state.modifiedTieuChuan.NgayHetHieuLuc = e.target.dpNgayHetHieuLuc.value;
-        if(this.state.addedIndex === this.state.modifiedTieuChuanIndex){
+        this.state.currentTieuChuan.TenTieuChuan = e.target.txtTenTieuChuan.value;
+        this.state.currentTieuChuan.MaLoaiSanPham = e.target.cbMaLoaiSanPham.value;
+        this.state.currentTieuChuan.NgayBatDauHieuLuc = e.target.dpNgayBatDauHieuLuc.value;
+        this.state.currentTieuChuan.NgayHetHieuLuc = e.target.dpNgayHetHieuLuc.value;
+        if(this.state.addedIndex === this.state.currentTieuChuanIndex){
             this.setState({
                 isAdded: -1
             });
         }
-        TieuChuanController.upsertTieuChuan(this.state.modifiedTieuChuan);
+        TieuChuanController.upsertTieuChuan(this.state.currentTieuChuan);
+        this.refs.notify.notificationAlert({
+            place: 'br',
+            message: (
+                <div>
+                    Cập nhật thành công
+                </div>
+            ),
+            type: "success",
+            icon: "now-ui-icons ui-1_bell-53",
+            autoDismiss: 4
+        })
     };
+
+
+    resetCurrentTieuChuan = () => {
+        this.selectTieuChuan(this.state.currentTieuChuanIndex);
+    };
+
+    resetCurrentChiTieu = () => {
+        this.selectChiTieu(this.state.currentChiTieuIndex);
+    }
 }
 
 export default TieuChuanForm;

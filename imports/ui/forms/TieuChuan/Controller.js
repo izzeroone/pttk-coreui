@@ -1,4 +1,4 @@
-import {TieuChuanDB, LoaiSanPhamDB} from "../../../collections/collections";
+import {TieuChuanDB, LoaiSanPhamDB, LoaiChiTieuDB} from "../../../collections/collections";
 import TieuChuanForm from "./TieuChuanForm";
 
 class Controller {
@@ -23,6 +23,9 @@ class Controller {
     }
     upsertTieuChuan = (TieuChuan) => {
         TieuChuanDB.upsert(TieuChuan._id, TieuChuan);
+    }
+    getTenLoaiChiTieu = (MaLoaiChiTieu) => {
+        return LoaiChiTieuDB.findOne(MaLoaiChiTieu);
     }
 }
 
