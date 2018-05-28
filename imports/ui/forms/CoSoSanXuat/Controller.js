@@ -8,7 +8,7 @@ class Controller {
         return CoSoSanXuatDB.find({Delete: false}).fetch();
     }
     upsertCoSoSanXuat(CoSoSanXuat){
-        return CoSoSanXuatDB(CoSoSanXuat._id, CoSoSanXuat);
+        return CoSoSanXuatDB.upsert(CoSoSanXuat._id, CoSoSanXuat);
     }
     deleteCoSoSanXuat(CoSoSanXuat) {
         return CoSoSanXuatDB.update(CoSoSanXuat._id, {Delete: true});

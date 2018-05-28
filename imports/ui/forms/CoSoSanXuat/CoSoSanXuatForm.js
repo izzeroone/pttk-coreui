@@ -27,6 +27,8 @@ import {Tracker} from 'meteor/tracker'
 import CoSoSanXuatController from './Controller'
 import $ from 'jquery'
 import NotificationAlert from "react-notification-alert";
+import Select from "react-select";
+import * as Animated from 'react-select/lib/animated';
 
 class CoSoSanXuatForm extends Component {
     componentWillMount = () => {
@@ -117,11 +119,17 @@ class CoSoSanXuatForm extends Component {
         </tr>)
     }
     renderDanhSachLoaiSanPham = () => {
-        if (this.state.danhSachLoaiSanPham) {
-            return this.state.danhSachLoaiSanPham.map((item, index) => {
-                return (<option value={item._id} key={item._id}>{item.TenLoaiSanPham}</option>)
-            });
-        }
+        var result = [];
+        this.state.danhSachLoaiSanPham.forEach((item, index) => {
+            result.push({value: item._id, label: item.TenLoaiSanPham})
+        });
+        console.log(result);
+        return result;
+        // if (this.state.danhSachLoaiSanPham) {
+        //     return this.state.danhSachLoaiSanPham.map((item, index) => {
+        //         return {value: item.MaLoaiSanPham, label: item.TenLoaiSanPham}
+        //     });
+        // }
     }
     renderCoSoSanXuat = () => {
         if (this.state.currentCoSoSanXuat === null) {
@@ -158,17 +166,25 @@ class CoSoSanXuatForm extends Component {
                             <Col md="3">
                                 <Label htmlFor="text-input">Tên cơ sỏ sản xuất</Label>
                             </Col>
-                            <Col xs="12" md="9">
-                                <Input type="text" id="txtTenCoSanXuat" name="text-input" placeholder="Text"
-                                       defaultValue={TieuChuan.TenTieuChuan}/>
-                            </Col>
-                        </FormGroup>
+                        <Col xs="12" md="9">
+                            <Input type="text" id="txtTenCoSoSanXuat" name="text-input" placeholder="Text"
+                                   defaultValue={TieuChuan.TenTieuChuan}
+                                   onChange={(e) => {
+                                       currentCoSoSanXuat = this.state.currentCoSoSanXuat;
+                                       currentCoSoSanXuat.TenCoSoSanXuat = e.target.value;
+                                       this.setState(currentCoSoSanXuat)}}/>
+                        </Col>
+                    </FormGroup>
                         <FormGroup row>
                             <Col md="3">
                                 <Label htmlFor="text-input">Chủ cơ sở</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="text" id="txtChuCoSo" name="text-input" placeholder="Text"/>
+                                <Input type="text" id="txtChuCoSo" name="text-input" placeholder="Text"
+                                       onChange={(e) => {
+                                           currentCoSoSanXuat = this.state.currentCoSoSanXuat;
+                                           currentCoSoSanXuat.ChuCoSo = e.target.value;
+                                           this.setState(currentCoSoSanXuat)}}/>
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -176,7 +192,11 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="text-input">Địa chỉ</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="text" id="txtDiaChi" name="text-input" placeholder="Text"/>
+                                <Input type="text" id="txtDiaChi" name="text-input" placeholder="Text"
+                                       onChange={(e) => {
+                                           currentCoSoSanXuat = this.state.currentCoSoSanXuat;
+                                           currentCoSoSanXuat.DiaChi = e.target.value;
+                                           this.setState(currentCoSoSanXuat)}}/>
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -184,7 +204,11 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="text-input">Số điện thoại</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="text" id="txtSoDienThoai" name="text-input" placeholder="Text"/>
+                                <Input type="text" id="txtSoDienThoai" name="text-input" placeholder="Text"
+                                       onChange={(e) => {
+                                           currentCoSoSanXuat = this.state.currentCoSoSanXuat;
+                                           currentCoSoSanXuat.DanhSachSoDienThoai = [e.target.value];
+                                           this.setState(currentCoSoSanXuat)}}/>
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -192,9 +216,18 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="select">Loại sản phẩm</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="select" multiple name="select" id="cbMaLoaiSanPham">
-                                    {this.renderDanhSachLoaiSanPham()}
-                                </Input>
+                                {/*<Input type="select" multiple name="select" id="cbMaLoaiSanPham">*/}
+                                    {/*{this.renderDanhSachLoaiSanPham()}*/}
+                                {/*</Input>*/}
+                                <Select id={"ipDanhSachMaSanPham"} options={this.renderDanhSachLoaiSanPham()} isMulti components={Animated}
+                                        onChange={(value) => {
+                                            let DanhSachMaSanPham = [];
+                                            value.forEach((item, index) => {
+                                                DanhSachMaSanPham.push(item.value)
+                                            });
+                                            currentCoSoSanXuat = this.state.currentCoSoSanXuat;
+                                            currentCoSoSanXuat.DanhSachMaLoaiSanPham = DanhSachMaSanPham;
+                                            this.setState(currentCoSoSanXuat)}}/>
                             </Col>
                         </FormGroup>
                         <Button type="submit" size="sm" color="primary"><i
@@ -216,6 +249,7 @@ class CoSoSanXuatForm extends Component {
             currentCoSoSanXuat: currentCoSoSanXuat
         });
         console.log(`Co so san xuat thu ${index} da duoc chon`);
+        console.log(currentCoSoSanXuat);
         $("#txtTenCoSoSanXuat").val(currentCoSoSanXuat.TenCoSoSanXuat);
         $("#txtChuCoSo").val(currentCoSoSanXuat.ChuCoSo);
         $("#txtDiaChi").val(currentCoSoSanXuat.DiaChi);
@@ -242,20 +276,15 @@ class CoSoSanXuatForm extends Component {
             autoDismiss: 4
         })
     }
-
     updateCoSoSanXuat = (e) => {
         e.preventDefault();
-        this.state.currentCoSoSanXuat.TenCoSoSanXuat = e.target.txtTenCoSoSanXuat.value;
-        this.state.currentCoSoSanXuat.ChuCoSo = e.target.txtChuCoSo.value;
-        this.state.currentCoSoSanXuat.DiaChi = e.target.txtDiaChi.value;
-        this.state.currentCoSoSanXuat.SoDienThoai = [e.target.txtSoDienThoai.value];
-        console.log($("#cbMaLoaiSanPham")[0].selectedOptions)
+
         if (this.state.addedCoSoSanXuatIndex === this.state.currentCoSoSanXuatIndex) {
             this.setState({
                 addedCoSoSanXuatUpdated: true
             });
         }
-        DangKySanPhamController.upsertTieuChuan(this.state.currentCoSoSanXuat);
+        CoSoSanXuatController.upsertCoSoSanXuat(this.state.currentCoSoSanXuat);
         this.notify("Cập nhật thành công", "success");
     };
     resetCurrentCoSoSanXuat = () => {
