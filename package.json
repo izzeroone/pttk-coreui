@@ -28,6 +28,7 @@
     "react-notification-alert": "0.0.7",
     "react-router-config": "^1.0.0-beta.4",
     "react-router-dom": "^4.2.2",
+    "react-select": "^2.0.0-beta.6",
     "react-test-renderer": "^16.3.2",
     "reactstrap": "^6.0.1",
     "simple-line-icons": "^2.4.1"

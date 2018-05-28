@@ -192,7 +192,7 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="select">Loại sản phẩm</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="multiple" name="select" id="cbMaLoaiSanPham">
+                                <Input type="select" multiple name="select" id="cbMaLoaiSanPham">
                                     {this.renderDanhSachLoaiSanPham()}
                                 </Input>
                             </Col>
@@ -249,6 +249,7 @@ class CoSoSanXuatForm extends Component {
         this.state.currentCoSoSanXuat.ChuCoSo = e.target.txtChuCoSo.value;
         this.state.currentCoSoSanXuat.DiaChi = e.target.txtDiaChi.value;
         this.state.currentCoSoSanXuat.SoDienThoai = [e.target.txtSoDienThoai.value];
+        console.log($("#cbMaLoaiSanPham")[0].selectedOptions)
         if (this.state.addedCoSoSanXuatIndex === this.state.currentCoSoSanXuatIndex) {
             this.setState({
                 addedCoSoSanXuatUpdated: true
