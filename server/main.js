@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import {TieuChuanDB, LoaiSanPhamDB, CoSoSanXuatDB, PhieuDangKyChatLuongDB, SanPhamDatChuanDB} from "../imports/collections/collections";
+import {TieuChuanDB, LoaiSanPhamDB, CoSoSanXuatDB, DangKySanPhamDB, SanPhamDatChuanDB} from "../imports/collections/collections";
 
 Meteor.startup(() => {
     // Insert sample data
@@ -11,6 +11,7 @@ Meteor.startup(() => {
     //Tieu chuan database
     TieuChuanDB.remove({});
     TieuChuanDB.insert({
+        _id: "ABCXYZ",
         TenTieuChuan: "NTX-12LX",
         MaLoaiSanPham: sp._id,
         NgayBatDauHieuLuc: moment("20140202").format("YYYY-MM-DD"),
@@ -18,13 +19,13 @@ Meteor.startup(() => {
         DanhSachChiTieu :[{
         TenChiTieu: "Hàm lượng Protein",
             LoaiChiTieu: "VQ",
-            GioiHanDuoi: "100",
+            GioiHanDuoi: 100,
             DonViDo: "mg/hh",
             MoTa:"Hàm lượng protein không được vượt quá"
         },{
             TenChiTieu: "Hàm lượng Sắt",
             LoaiChiTieu: "KVQ",
-            GioiHanTren: "100",
+            GioiHanTren: 100,
             DonViDo: "mg/hh",
             GhiChu:"Hàm lượng protein không được vượt quá"
         },{
@@ -37,25 +38,52 @@ Meteor.startup(() => {
     });
 
     //Co so san xuat database
+    CoSoSanXuatDB.remove({});
     CoSoSanXuatDB.insert({
+        _id: "ABCXYZ",
+        TenCoSoSanXuat: "Xuong san xuat abc xyz",
         ChuCoSo: "Nguyen Van A",
         DiaChi: "24 Pham Van Dong",
-        SoDienThoai : ["1212312", "23432312321"],
-        DanhSachMaLoaiSanPham : ["CH", "CV"]
+        DanhSachSoDienThoai : ["1212312", "23432312321"],
+        DanhSachMaLoaiSanPham : ["CH", "CV"],
+        Delete: false
     })
 
     let cssx = CoSoSanXuatDB.findOne({ChuCoSo: "Nguyen Van A"});
     let tc = TieuChuanDB.findOne({TenTieuChuan: "NTX-12LX"});
 
     //Phieu Dang ky
-    PhieuDangKyChatLuongDB.insert({
+    DangKySanPhamDB.remove({});
+    DangKySanPhamDB.insert({
         MaCoSoSanXuat : cssx._id,
         TenSanPham: "Cá hộp Bacasa 100g/l",
         MaLoaiSanPham: sp._id,
-        NgayDangKy: moment().format("YYYY-MM-DD"),
-        NgayHetHan: moment().format("YYYY-MM-DD"),
+        NgayDangKy: moment("20140202").format("YYYY-MM-DD"),
+        NgayHetHan: moment("20190202").format("YYYY-MM-DD"),
         SoLuongDangKy: 12,
-        MaTieuChuan : tc._id
+        MaTieuChuan : tc._id,
+        DanhSachChiTieu :[{
+            TenChiTieu: "Hàm lượng Protein",
+            LoaiChiTieu: "VQ",
+            GioiHanDuoi: 100,
+            DonViDo: "mg/hh",
+            MoTa:"Hàm lượng protein không được vượt quá",
+            ThucTe: "122"
+        },{
+            TenChiTieu: "Hàm lượng Sắt",
+            LoaiChiTieu: "KVQ",
+            GioiHanTren: 100,
+            DonViDo: "mg/hh",
+            GhiChu:"Hàm lượng protein không được vượt quá",
+            ThucTe : "1121"
+        },{
+            TenChiTieu: "SOMEHING",
+            LoaiChiTieu: "MT",
+            MoTa: "Mo ta cai gi do",
+            GhiChu:"Hàm lượng protein không được vượt quá",
+            ThucTe: true,
+        },],
+        Delete: false
     })
 
 

@@ -1,13 +1,25 @@
-import {TieuChuanDB} from "../../../collections/collections";
+import {CoSoSanXuatDB, LoaiChiTieuDB, LoaiSanPhamDB, TieuChuanDB} from "../../../collections/collections";
 
 class Controller {
-    addTieuChuan(TieuChuan){
-        TieuChuanDB.insert(TieuChuan);
+    addCoSoSanXuat(CoSoSanXuat){
+        return CoSoSanXuatDB.insert(CoSoSanXuat);
     }
-    getAllTieuChuan(){
-        return TieuChuanDB.find().fetch();
+    getAllCoSoSanXuat(){
+        return CoSoSanXuatDB.find({Delete: false}).fetch();
+    }
+    upsertCoSoSanXuat(CoSoSanXuat){
+        return CoSoSanXuatDB(CoSoSanXuat._id, CoSoSanXuat);
+    }
+    deleteCoSoSanXuat(CoSoSanXuat) {
+        return CoSoSanXuatDB.update(CoSoSanXuat._id, {Delete: true});
+    }
+    getAllLoaiSanPham(){
+        return LoaiSanPhamDB.find({Delete: false}).fetch();
+    }
+    getLoaiSanPham(MaLoaiSanPham){
+        return LoaiSanPhamDB.findOne(MaLoaiSanPham);
     }
 }
 
-export default TieuChuanController = new Controller();
+export default CoSoSanXuatController = new Controller();
 

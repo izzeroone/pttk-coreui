@@ -177,7 +177,7 @@ const TieuChuan = Loadable({
 });
 
 const DangKySanPham = Loadable({
-    loader: () => import('./forms/DangKySanPham'),
+    loader: () => import('./forms/DangKySanPham/DangKySanPhamForm'),
     loading: Loading,
 });
 
@@ -187,7 +187,7 @@ const KiemTraSanPham = Loadable({
 });
 
 const CoSoSanXuat = Loadable({
-    loader: () => import('./forms/CoSoSanXuat'),
+    loader: () => import('./forms/CoSoSanXuat/CoSoSanXuatForm'),
     loading: Loading,
 });
 

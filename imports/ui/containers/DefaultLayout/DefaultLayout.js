@@ -40,7 +40,7 @@ class DefaultLayout extends Component {
                     <main className="main">
                         <AppBreadcrumb appRoutes={routes}/>
                         <Container fluid>
-                            <Redirect from="/" to="/dashboard"/>
+                            {/*<Redirect from="/" to="/dashboard"/>*/}
                             <Switch>
                                 {routes.map((route, idx) => {
                                         return route.component ? (

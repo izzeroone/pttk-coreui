@@ -29,4 +29,4 @@ class Controller {
     }
 }
 
-export default TieuChuanController = new Controller();
+export default DangKySanPhamController = new Controller();

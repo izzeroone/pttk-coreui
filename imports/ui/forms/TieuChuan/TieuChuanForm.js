@@ -62,8 +62,8 @@ class TieuChuanForm extends Component {
             addedChiTieuUpdated: true,
             deleteModalShown: false,
             chiTieuModalShown: false,
-            currentTieuChuanIndex: null,
-            currentTieuChuan: null,
+            currentCoSoSanXuatIndex: null,
+            currentCoSoSanXuat: null,
             currentChiTieuIndex: null,
             currentLoaiChiTieu: null,
             danhSachTieuChuan: null,
@@ -74,15 +74,15 @@ class TieuChuanForm extends Component {
     componentWillMount = () => {
         Tracker.autorun(() => {
             this.setState({
-                danhSachTieuChuan: TieuChuanController.getTatCaTieuChuan(),
-                danhSachLoaiSanPham: TieuChuanController.getTatCaLoaiSanPham()
+                danhSachCoSoSanXuat: DangKySanPhamController.getTatCaTieuChuan(),
+                danhSachLoaiSanPham: DangKySanPhamController.getTatCaLoaiSanPham()
             })
 
         })
     }
 
     renderDeleteModal = () => {
-        if (this.state.currentTieuChuan === null) {
+        if (this.state.currentCoSoSanXuat === null) {
             return
         }
 
@@ -95,13 +95,19 @@ class TieuChuanForm extends Component {
             <ModalHeader toggle={this.toggleDanger}>Xác nhận xóa</ModalHeader>
             <ModalBody>
                 Bạn chắc chắn có muốn xóa tiêu
-                chuẩn {this.state.currentTieuChuan.TenTieuChuan}
+                chuẩn {this.state.currentCoSoSanXuat.TenTieuChuan}
             </ModalBody>
             <ModalFooter>
                 <Button color="danger" onClick={() => {
-                    TieuChuanController.deleteTieuChuan(this.state.currentTieuChuan._id)
-                    this.setState({currentTieuChuan: null,
-                        currentTieuChuanIndex: null})
+                    DangKySanPhamController.deleteTieuChuan(this.state.currentCoSoSanXuat._id);
+                    if(this.state.currentCoSoSanXuatIndex === this.state.addedTieuChuanIndex){
+                        this.setState({
+                            addedCoSoSanXuatUpdated: true
+                        })
+                    }
+                    this.setState({currentCoSoSanXuat: null,
+                        currentCoSoSanXuatIndex: null});
+
                     toggleDeleteModal()
                 }}>Xóa</Button>{' '}
                 <Button color="secondary" onClick={() => toggleDeleteModal()}>Hủy</Button>
@@ -139,7 +145,7 @@ class TieuChuanForm extends Component {
                         </Col>
                         <Col xs="12" md="9">
                             <Input type="select" name="select" id="cbLoaiChiTieu" onChange={(e) => {
-                                this.setState({currentLoaiChiTieu: e.target.value})
+                                this.setState({currentCoSoSanXuat: e.target.value})
                                 this.displayRelevantChiTieuInfo(e.target.value)}}>
                                 <option value={"MT"}>Mô tả</option>
                                 <option value={"NG"}>Nằm giữa</option>
@@ -204,8 +210,8 @@ class TieuChuanForm extends Component {
         let shownDeleteModal = (index) => {
             this.setState({
                 deleteModalShown: !this.state.deleteModalShown,
-                currentTieuChuanIndex: index,
-                currentTieuChuan: this.state.danhSachTieuChuan[index]
+                currentCoSoSanXuatIndex: index,
+                currentCoSoSanXuat: this.state.danhSachTieuChuan[index]
             })
         };
         if (this.state.danhSachTieuChuan && this.state.danhSachTieuChuan.length != 0) {
@@ -213,7 +219,7 @@ class TieuChuanForm extends Component {
                 return (
                     <tr key={index}>
                         <td>{item.TenTieuChuan}</td>
-                        <td>{TieuChuanController.getTenSanPham(item.MaLoaiSanPham).TenLoaiSanPham}</td>
+                        <td>{DangKySanPhamController.getTenSanPham(item.MaLoaiSanPham).TenLoaiSanPham}</td>
                         <td>
                             {(moment().isBefore(item.NgayBatDauHieuLuc)) ?
                                 <Badge className="mr-1" color="warning" pill>Chưa hiệu lực</Badge> :
@@ -248,7 +254,7 @@ class TieuChuanForm extends Component {
     }
 
     renderTieuChuan = () => {
-        if (this.state.currentTieuChuan === null) {
+        if (this.state.currentCoSoSanXuat === null) {
             return (
                 <Card>
                     <CardHeader>
@@ -260,7 +266,7 @@ class TieuChuanForm extends Component {
                 </Card>
             )
         }
-        let TieuChuan = this.state.currentTieuChuan;
+        let TieuChuan = this.state.currentCoSoSanXuat;
         return (
             <Card>
                 <CardHeader>
@@ -396,14 +402,14 @@ class TieuChuanForm extends Component {
                             <Button size="sm" color="primary" className="btn-pill"
                                     onClick={() => {
                                         this.setState({
-                                        currentChiTieuIndex: index,
+                                        currentCoSoSanXuatIndex: index,
                                         chiTieuModalShown: true
                                     })
                                     }}><span
                                 style={{fontSize: "4"}}>Sửa</span></Button>
                             <Button size="sm" color="danger" className="btn-pill"
                             onClick={() => {
-                                this.state.currentTieuChuan.DanhSachChiTieu.splice(index, 1);
+                                this.state.currentCoSoSanXuat.DanhSachChiTieu.splice(index, 1);
                                 this.forceUpdate()}}><span
                                 style={{fontSize: "4"}}>Xóa</span></Button>
                         </td>
@@ -461,8 +467,8 @@ class TieuChuanForm extends Component {
     selectTieuChuan = (index) => {
         let modifiedTieuChuan = this.state.danhSachTieuChuan[index];
         this.setState({
-            currentTieuChuanIndex: index,
-            currentTieuChuan: modifiedTieuChuan
+            currentCoSoSanXuatIndex: index,
+            currentCoSoSanXuat: modifiedTieuChuan
         });
         console.log(`Tien chuan thu ${index} da duoc chon`);
         $("#txtTenTieuChuan").val(modifiedTieuChuan.TenTieuChuan);
@@ -473,9 +479,9 @@ class TieuChuanForm extends Component {
 
     selectChiTieu = (index) => {
         console.log(`Chi tieu thu ${index} da duoc chon`);
-        let currentChiTieu = this.state.currentTieuChuan.DanhSachChiTieu[index];
+        let currentChiTieu = this.state.currentCoSoSanXuat.DanhSachChiTieu[index];
         this.setState({
-            currentLoaiChiTieu: currentChiTieu.LoaiChiTieu
+            currentCoSoSanXuat: currentChiTieu.LoaiChiTieu
         });
         //Get element render before dom
         this.displayRelevantChiTieuInfo(currentChiTieu.LoaiChiTieu);
@@ -522,47 +528,37 @@ class TieuChuanForm extends Component {
     addTieuChuan = () => {
         //Thêm mới mà chưa cập nhật thì ko cho thêm
         if (this.state.addedTieuChuanUpdated === false) {
-            this.refs.notify.notificationAlert({
-                place: 'br',
-                message: (
-                    <div>
-                        Bạn chưa cập nhật tiêu chuẩn mới thêm
-                    </div>
-                ),
-                type: "warning",
-                icon: "now-ui-icons ui-1_bell-53",
-                autoDismiss: 4
-            })
+            this.notify("Bạn chưa cập nhật tiêu chuẩn mới thêm", "warning");
             return;
         }
         this.setState({
-            addedTieuChuanUpdated: false,
-            addedTieuChuanIndex: this.state.danhSachTieuChuan.length
+            addedCoSoSanXuatUpdated: false,
+            addedCoSoSanXuatIndex: this.state.danhSachTieuChuan.length
         });
-        console.log(TieuChuanController.addTieuChuan(this.dummyTieuChuan));
+        console.log(DangKySanPhamController.addTieuChuan(this.dummyTieuChuan));
+    }
+
+    notify = (message, type) => {
+        this.refs.notify.notificationAlert({
+            place: 'br',
+            message: message,
+            type: type,
+            icon: "now-ui-icons ui-1_bell-53",
+            autoDismiss: 4
+        })
     }
 
     addChiTieu = () => {
         //Thêm mới mà chưa cập nhật thì ko cho thêm
         if (this.state.addedChiTieuUpdated === false) {
-            this.refs.notify.notificationAlert({
-                place: 'br',
-                message: (
-                    <div>
-                        Bạn chưa cập nhật chỉ tiêu mới thêm
-                    </div>
-                ),
-                type: "warning",
-                icon: "now-ui-icons ui-1_bell-53",
-                autoDismiss: 4
-            });
+            this.notify("Bạn chưa cập nhật chỉ tiêu mới thêm", "warning")
             return;
         }
         this.setState({
             addedChiTieuUpdated: false,
-            addedChiTieuIndex: this.state.currentTieuChuan.DanhSachChiTieu.length
+            addedChiTieuIndex: this.state.currentCoSoSanXuat.DanhSachChiTieu.length
         });
-        this.state.currentTieuChuan.DanhSachChiTieu.push(this.dummyChiTieu);
+        this.state.currentCoSoSanXuat.DanhSachChiTieu.push(this.dummyChiTieu);
     };
 
     updateChiTieu = (e) => {
@@ -592,42 +588,32 @@ class TieuChuanForm extends Component {
         //         ChiTieu.DonViDo = $("#txtDonViDo").val();
         //         break;
         // }
-        let currentTieuChuan = this.state.currentTieuChuan;
+        let currentTieuChuan = this.state.currentCoSoSanXuat;
         currentTieuChuan.DanhSachChiTieu[this.state.currentChiTieuIndex] = ChiTieu;
         this.setState({
-            currentTieuChuan : currentTieuChuan
+            currentCoSoSanXuat : currentTieuChuan
         })
-        console.log(this.state.currentTieuChuan);
+        console.log(this.state.currentCoSoSanXuat);
     }
 
     updateTieuChuan = (e) => {
         e.preventDefault();
-        this.state.currentTieuChuan.TenTieuChuan = e.target.txtTenTieuChuan.value;
-        this.state.currentTieuChuan.MaLoaiSanPham = e.target.cbMaLoaiSanPham.value;
-        this.state.currentTieuChuan.NgayBatDauHieuLuc = e.target.dpNgayBatDauHieuLuc.value;
-        this.state.currentTieuChuan.NgayHetHieuLuc = e.target.dpNgayHetHieuLuc.value;
-        if(this.state.addedTieuChuanIndex === this.state.currentTieuChuanIndex){
+        this.state.currentCoSoSanXuat.TenTieuChuan = e.target.txtTenTieuChuan.value;
+        this.state.currentCoSoSanXuat.MaLoaiSanPham = e.target.cbMaLoaiSanPham.value;
+        this.state.currentCoSoSanXuat.NgayBatDauHieuLuc = e.target.dpNgayBatDauHieuLuc.value;
+        this.state.currentCoSoSanXuat.NgayHetHieuLuc = e.target.dpNgayHetHieuLuc.value;
+        if(this.state.addedTieuChuanIndex === this.state.currentCoSoSanXuatIndex){
             this.setState({
-                addedTieuChuanUpdated: true
+                addedCoSoSanXuatUpdated: true
             });
         }
-        TieuChuanController.upsertTieuChuan(this.state.currentTieuChuan);
-        this.refs.notify.notificationAlert({
-            place: 'br',
-            message: (
-                <div>
-                    Cập nhật thành công
-                </div>
-            ),
-            type: "success",
-            icon: "now-ui-icons ui-1_bell-53",
-            autoDismiss: 4
-        })
+        DangKySanPhamController.upsertTieuChuan(this.state.currentCoSoSanXuat);
+        this.notify("Cập nhật thành công", "success");
     };
 
 
     resetCurrentTieuChuan = () => {
-        this.selectTieuChuan(this.state.currentTieuChuanIndex);
+        this.selectTieuChuan(this.state.currentCoSoSanXuatIndex);
     };
 
     resetCurrentChiTieu = () => {
