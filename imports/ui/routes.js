@@ -182,7 +182,7 @@ const DangKySanPham = Loadable({
 });
 
 const KiemTraSanPham = Loadable({
-    loader: () => import('./forms/KiemTraSanPham'),
+    loader: () => import('./forms/KiemTraSanPham/KiemTraSanPhamForm'),
     loading: Loading,
 });
 

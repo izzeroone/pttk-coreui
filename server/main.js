@@ -1,5 +1,12 @@
 import { Meteor } from 'meteor/meteor';
-import {TieuChuanDB, LoaiSanPhamDB, CoSoSanXuatDB, DangKySanPhamDB, SanPhamDatChuanDB} from "../imports/collections/collections";
+import {
+    TieuChuanDB,
+    LoaiSanPhamDB,
+    CoSoSanXuatDB,
+    DangKySanPhamDB,
+    SanPhamDatChuanDB,
+    KiemTraSanPhamDB
+} from "../imports/collections/collections";
 
 Meteor.startup(() => {
     // Insert sample data
@@ -17,18 +24,21 @@ Meteor.startup(() => {
         NgayBatDauHieuLuc: moment("20140202").format("YYYY-MM-DD"),
         NgayHetHieuLuc: moment("20190202").format("YYYY-MM-DD"),
         DanhSachChiTieu :[{
+            MaChiTieu: "PT",
         TenChiTieu: "Hàm lượng Protein",
             LoaiChiTieu: "VQ",
             GioiHanDuoi: 100,
             DonViDo: "mg/hh",
             MoTa:"Hàm lượng protein không được vượt quá"
         },{
+            MaChiTieu: "FE",
             TenChiTieu: "Hàm lượng Sắt",
             LoaiChiTieu: "KVQ",
             GioiHanTren: 100,
             DonViDo: "mg/hh",
             GhiChu:"Hàm lượng protein không được vượt quá"
         },{
+            MaChiTieu: "ST",
             TenChiTieu: "SOMEHING",
             LoaiChiTieu: "MT",
             MoTa: "Mo ta cai gi do",
@@ -55,6 +65,7 @@ Meteor.startup(() => {
     //Phieu Dang ky
     DangKySanPhamDB.remove({});
     DangKySanPhamDB.insert({
+        _id: "abv",
         MaCoSoSanXuat : cssx._id,
         TenSanPham: "Cá hộp Bacasa 100g/l",
         MaLoaiSanPham: sp._id,
@@ -63,26 +74,33 @@ Meteor.startup(() => {
         SoLuongDangKy: 12,
         MaTieuChuan : tc._id,
         DanhSachChiTieu :[{
-            TenChiTieu: "Hàm lượng Protein",
-            LoaiChiTieu: "VQ",
-            GioiHanDuoi: 100,
-            DonViDo: "mg/hh",
-            MoTa:"Hàm lượng protein không được vượt quá",
+            MaChiTieu : "PT",
             ThucTe: "122"
         },{
-            TenChiTieu: "Hàm lượng Sắt",
-            LoaiChiTieu: "KVQ",
-            GioiHanTren: 100,
-            DonViDo: "mg/hh",
-            GhiChu:"Hàm lượng protein không được vượt quá",
+            MaChiTieu : "FE",
             ThucTe : "1121"
         },{
-            TenChiTieu: "SOMEHING",
-            LoaiChiTieu: "MT",
-            MoTa: "Mo ta cai gi do",
-            GhiChu:"Hàm lượng protein không được vượt quá",
+            MaChiTieu : "ST",
             ThucTe: true,
         },],
+        Delete: false
+    })
+
+    //Phieu kiem tra
+    KiemTraSanPhamDB.remove({});
+    KiemTraSanPhamDB.insert({
+        MaDangKySanPham : "abv",
+        DanhSachChiTieu :[{
+            MaChiTieu : "PT",
+            ThucTe: "122"
+        },{
+            MaChiTieu : "FE",
+            ThucTe : "1121"
+        },{
+            MaChiTieu : "ST",
+            ThucTe: true,
+        },],
+        KetQuaKiemTra : false,
         Delete: false
     })
 

@@ -246,7 +246,8 @@ class CoSoSanXuatForm extends Component {
         let currentCoSoSanXuat = this.state.danhSachCoSoSanXuat[index];
         this.setState({
             currentCoSoSanXuatIndex: index,
-            currentCoSoSanXuat: currentCoSoSanXuat
+            currentCoSoSanXuat: currentCoSoSanXuat,
+            originalCoSoSanXuat: Object.assign({}, currentCoSoSanXuat)
         });
         console.log(`Co so san xuat thu ${index} da duoc chon`);
         console.log(currentCoSoSanXuat);
@@ -288,7 +289,16 @@ class CoSoSanXuatForm extends Component {
         this.notify("Cập nhật thành công", "success");
     };
     resetCurrentCoSoSanXuat = () => {
-        this.selectCoSoSanXuat(this.state.currentCoSoSanXuatIndex);
+        let resetCoSoSanXuat = Object.assign({}, this.state.originalCoSoSanXuat);
+        this.setState({
+            currentCoSoSanXuat: resetCoSoSanXuat
+        });
+        console.log(`Dat lai co so san xuat da duoc chon`);
+        console.log(this.state.originalCoSoSanXuat);
+        $("#txtTenCoSoSanXuat").val(resetCoSoSanXuat.TenCoSoSanXuat);
+        $("#txtChuCoSo").val(resetCoSoSanXuat.ChuCoSo);
+        $("#txtDiaChi").val(resetCoSoSanXuat.DiaChi);
+        $("#txtSoDienThoai").val(resetCoSoSanXuat.DanhSachSoDienThoai[0]);
     };
 
     constructor(props) {
@@ -310,6 +320,7 @@ class CoSoSanXuatForm extends Component {
             deleteModalShown: false,
             currentCoSoSanXuatIndex: null,
             currentCoSoSanXuat: null,
+            originalCoSoSanXuat: null,
             danhSachCoSoSanXuat: null,
             danhSachLoaiSanPham: null,
         };
