@@ -90,6 +90,7 @@ Meteor.startup(() => {
     KiemTraSanPhamDB.remove({});
     KiemTraSanPhamDB.insert({
         MaDangKySanPham : "abv",
+        NgayKiemTra: moment("20140202").format("YYYY-MM-DD"),
         DanhSachChiTieu :[{
             MaChiTieu : "PT",
             ThucTe: "122"
