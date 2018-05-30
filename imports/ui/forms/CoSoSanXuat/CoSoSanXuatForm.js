@@ -41,7 +41,7 @@ class CoSoSanXuatForm extends Component {
         })
     }
     renderDeleteModal = () => {
-        if (this.state.currentCoSoSanXuat === null) {
+        if (this.state.deleteCoSoSanXuatIndex === null) {
             return
         }
 
@@ -49,17 +49,19 @@ class CoSoSanXuatForm extends Component {
             this.setState({deleteModalShown: !this.state.deleteModalShown})
         }
 
+        let deleteCoSoSanXuat = this.state.danhSachCoSoSanXuat[this.state.deleteCoSoSanXuatIndex];
+
         return (<Modal isOpen={this.state.deleteModalShown} toggle={toggleDeleteModal}
                        className={'modal-danger ' + this.props.className}>
             <ModalHeader toggle={this.toggleDanger}>Xác nhận xóa</ModalHeader>
             <ModalBody>
                 Bạn chắc chắn có muốn xóa tiêu
-                chuẩn {this.state.currentCoSoSanXuat.TenCoSoSanXuat}
+                chuẩn {deleteCoSoSanXuat.TenCoSoSanXuat}
             </ModalBody>
             <ModalFooter>
                 <Button color="danger" onClick={() => {
-                    CoSoSanXuatController.deleteCoSoSanXuat(this.state.currentCoSoSanXuat._id);
-                    if (this.state.currentCoSoSanXuatIndex === this.state.addedCoSoSanXuatIndex) {
+                    CoSoSanXuatController.deleteCoSoSanXuat(deleteCoSoSanXuat._id);
+                    if (this.state.deleteCoSoSanXuatIndex === this.state.addedCoSoSanXuatIndex) {
                         this.setState({
                             addedCoSoSanXuatUpdated: true
                         })
@@ -83,9 +85,8 @@ class CoSoSanXuatForm extends Component {
     renderDanhSachCoSoSanXuat = () => {
         let shownDeleteModal = (index) => {
             this.setState({
-                deleteModalShown: !this.state.deleteModalShown,
-                currentCoSoSanXuatIndex: index,
-                currentCoSoSanXuat: this.state.danhSachCoSoSanXuat[index]
+                deleteModalShown: true,
+                deleteCoSoSanXuatIndex: index
             })
         };
         if (this.state.danhSachCoSoSanXuat && this.state.danhSachCoSoSanXuat.length != 0) {
@@ -123,13 +124,7 @@ class CoSoSanXuatForm extends Component {
         this.state.danhSachLoaiSanPham.forEach((item, index) => {
             result.push({value: item._id, label: item.TenLoaiSanPham})
         });
-        console.log(result);
         return result;
-        // if (this.state.danhSachLoaiSanPham) {
-        //     return this.state.danhSachLoaiSanPham.map((item, index) => {
-        //         return {value: item.MaLoaiSanPham, label: item.TenLoaiSanPham}
-        //     });
-        // }
     }
     renderCoSoSanXuat = () => {
         if (this.state.currentCoSoSanXuat === null) {
@@ -144,7 +139,7 @@ class CoSoSanXuatForm extends Component {
                 </Card>
             )
         }
-        let TieuChuan = this.state.currentCoSoSanXuat;
+
         return (
             <Card>
                 <CardHeader>
@@ -167,9 +162,7 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="text-input">Tên cơ sỏ sản xuất</Label>
                             </Col>
                         <Col xs="12" md="9">
-                            <Input type="text" id="txtTenCoSoSanXuat" name="text-input" placeholder="Text"
-                                   defaultValue={TieuChuan.TenTieuChuan}
-                                   onChange={(e) => {
+                            <Input type="text" id="txtTenCoSoSanXuat" name="text-input" onChange={(e) => {
                                        currentCoSoSanXuat = this.state.currentCoSoSanXuat;
                                        currentCoSoSanXuat.TenCoSoSanXuat = e.target.value;
                                        this.setState(currentCoSoSanXuat)}}/>
@@ -180,7 +173,7 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="text-input">Chủ cơ sở</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="text" id="txtChuCoSo" name="text-input" placeholder="Text"
+                                <Input type="text" id="txtChuCoSo" name="text-input"
                                        onChange={(e) => {
                                            currentCoSoSanXuat = this.state.currentCoSoSanXuat;
                                            currentCoSoSanXuat.ChuCoSo = e.target.value;
@@ -204,7 +197,7 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="text-input">Số điện thoại</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="text" id="txtSoDienThoai" name="text-input" placeholder="Text"
+                                <Input type="text" id="txtSoDienThoai" name="text-input"
                                        onChange={(e) => {
                                            currentCoSoSanXuat = this.state.currentCoSoSanXuat;
                                            currentCoSoSanXuat.DanhSachSoDienThoai = [e.target.value];
@@ -216,10 +209,7 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="select">Loại sản phẩm</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                {/*<Input type="select" multiple name="select" id="cbMaLoaiSanPham">*/}
-                                    {/*{this.renderDanhSachLoaiSanPham()}*/}
-                                {/*</Input>*/}
-                                <Select id={"ipDanhSachMaSanPham"} options={this.renderDanhSachLoaiSanPham()} isMulti components={Animated}
+                                <Select id={"ipDanhSachMaSanPham"} name={"ipDanhSachMaSanPham"} options={this.renderDanhSachLoaiSanPham()} isMulti components={Animated}
                                         onChange={(value) => {
                                             let DanhSachMaSanPham = [];
                                             value.forEach((item, index) => {
@@ -246,8 +236,7 @@ class CoSoSanXuatForm extends Component {
         let currentCoSoSanXuat = this.state.danhSachCoSoSanXuat[index];
         this.setState({
             currentCoSoSanXuatIndex: index,
-            currentCoSoSanXuat: currentCoSoSanXuat,
-            originalCoSoSanXuat: Object.assign({}, currentCoSoSanXuat)
+            currentCoSoSanXuat: lodash.cloneDeep(currentCoSoSanXuat)
         });
         console.log(`Co so san xuat thu ${index} da duoc chon`);
         console.log(currentCoSoSanXuat);
@@ -289,16 +278,8 @@ class CoSoSanXuatForm extends Component {
         this.notify("Cập nhật thành công", "success");
     };
     resetCurrentCoSoSanXuat = () => {
-        let resetCoSoSanXuat = Object.assign({}, this.state.originalCoSoSanXuat);
-        this.setState({
-            currentCoSoSanXuat: resetCoSoSanXuat
-        });
-        console.log(`Dat lai co so san xuat da duoc chon`);
-        console.log(this.state.originalCoSoSanXuat);
-        $("#txtTenCoSoSanXuat").val(resetCoSoSanXuat.TenCoSoSanXuat);
-        $("#txtChuCoSo").val(resetCoSoSanXuat.ChuCoSo);
-        $("#txtDiaChi").val(resetCoSoSanXuat.DiaChi);
-        $("#txtSoDienThoai").val(resetCoSoSanXuat.DanhSachSoDienThoai[0]);
+        this.selectCoSoSanXuat(this.state.currentCoSoSanXuatIndex);
+        this.selectCoSoSanXuat(this.state.currentCoSoSanXuatIndex);
     };
 
     constructor(props) {
@@ -320,7 +301,7 @@ class CoSoSanXuatForm extends Component {
             deleteModalShown: false,
             currentCoSoSanXuatIndex: null,
             currentCoSoSanXuat: null,
-            originalCoSoSanXuat: null,
+            deleteCoSoSanXuatIndex: null,
             danhSachCoSoSanXuat: null,
             danhSachLoaiSanPham: null,
         };

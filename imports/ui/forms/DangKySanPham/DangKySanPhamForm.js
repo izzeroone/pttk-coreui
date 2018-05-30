@@ -49,9 +49,8 @@ class DangKySanPhamForm extends Component {
             deleteModalShown: false,
             currentDangKySanPhamIndex: null,
             currentDangKySanPham: null,
-            currentCoSoSanXuatIndex: null,
-            currentCoSoSanXuat: null,
-            currentCoSoSanXuat: null,
+            currentTieuChuan: null,
+            currentTieuChuanIndex: null,
             danhSachCoSoSanXuat: null,
             danhSachDangKySanPham: null,
             danhSachLoaiSanPham: null,
@@ -62,7 +61,7 @@ class DangKySanPhamForm extends Component {
     componentWillMount = () => {
         Tracker.autorun(() => {
             this.setState({
-                danhSachCoSoSanXuat: DangKySanPhamController.getTatCaTieuChuan(),
+                danhSachTieuChuan: DangKySanPhamController.getTatCaTieuChuan(),
                 danhSachCoSoSanXuat: DangKySanPhamController.getTatCaCoSoSanXuat(),
                 danhSachLoaiSanPham: DangKySanPhamController.getTatCaLoaiSanPham(),
                 danhSachDangKySanPham: DangKySanPhamController.getTatCaDangKySanPham(),
@@ -165,7 +164,7 @@ class DangKySanPhamForm extends Component {
                 </Card>
             )
         }
-        let TieuChuan = this.state.currentCoSoSanXuat;
+
         return (
             <Card>
                 <CardHeader>
@@ -277,10 +276,8 @@ class DangKySanPhamForm extends Component {
     renderDanhSachChiTieu = () => {
         //San pham moi thi dung chi tieu hien hanh
         let isNewSanPham = this.state.addedDangKySanPhamIndex === this.state.currentDangKySanPhamIndex;
-        let danhSachChiTieu = this.state.currentDangKySanPham.DanhSachChiTieu;
-        if(isNewSanPham){
-            danhSachChiTieu = this.state.currentCoSoSanXuat.DanhSachChiTieu;
-        }
+        let danhSachChiTieu = this.state.currentTieuChuan.DanhSachChiTieu;
+        let chiTieuThucTe = this.state.currentDangKySanPham.DanhSachChiTieu;
         if (Array.isArray(danhSachChiTieu)) {
             return danhSachChiTieu.map((item, index) => {
                 let TenLoaiChiTieu = null;
@@ -316,14 +313,14 @@ class DangKySanPhamForm extends Component {
                         <td>{DonViDo}</td>
                         <td>{item.GhiChu}</td>
                         <td>
-                        {item.LoaiChiTieu != "MT" ?
-                            <Input id ={"ThucTeChiTieu_" + index} type="number" defaultValue={item.ThucTe}/>
-                            :
-                            <p>
-                                <Input id ={"ThucTeChiTieu_" + index} type="checkbox" defaultValue={item.ThucTe}/>
-                                <p>Đạt</p>
-                            </p>
-                        }
+                            {item.LoaiChiTieu != "MT" ?
+                                <Input id ={"ThucTeChiTieu_" + index} type="number" defaultValue={chiTieuThucTe[index].ThucTe}/>
+                                :
+                                <p>
+                                    <Input id ={"ThucTeChiTieu_" + index} type="checkbox" defaultValue={chiTieuThucTe[index].ThucTe}/>
+                                    <p>Đạt</p>
+                                </p>
+                            }
                         </td>
                     </tr>
                 )
@@ -377,9 +374,14 @@ class DangKySanPhamForm extends Component {
 
     selectDangKySanPham = (index) => {
         let currentDangKySanPham = this.state.danhSachDangKySanPham[index];
+        let currentTieuChuan = this.state.danhSachTieuChuan.find(tieuChuan => {
+            return tieuChuan._id = currentDangKySanPham.MaTieuChuan
+        });
+
         this.setState({
             currentDangKySanPhamIndex: index,
-            currentDangKySanPham: currentDangKySanPham
+            currentDangKySanPham: lodash.cloneDeep(currentDangKySanPham),
+            currentTieuChuan: lodash.cloneDeep(currentTieuChuan)
         });
         console.log(`San pham thu ${index} da duoc chon`);
         $("#txtMaDangKySanPham").val(currentDangKySanPham._id);
@@ -396,9 +398,9 @@ class DangKySanPhamForm extends Component {
 
     selectChiTieu = (index) => {
         console.log(`Chi tieu thu ${index} da duoc chon`);
-        let currentChiTieu = this.state.currentCoSoSanXuat.DanhSachChiTieu[index];
+        let currentChiTieu = this.state.currentChiTieu.DanhSachChiTieu[index];
         this.setState({
-            currentCoSoSanXuat: currentChiTieu.LoaiChiTieu
+            currentChiTieu: currentChiTieu.LoaiChiTieu
         });
         //Get element render before dom
         this.displayRelevantChiTieuInfo(currentChiTieu.LoaiChiTieu);
@@ -414,7 +416,7 @@ class DangKySanPhamForm extends Component {
 
     selectTieuChuan = (MaTieuChuan) => {
         this.setState({
-            currentCoSoSanXuat: DangKySanPhamController.getTieuChuan(MaTieuChuan)
+            currentTieuChuan: DangKySanPhamController.getTieuChuan(MaTieuChuan)
         })
     }
 
@@ -431,61 +433,52 @@ class DangKySanPhamForm extends Component {
         });
         console.log(DangKySanPhamController.addDangKySanPham(this.dummyDangKySanPham));
     }
-    
+
 
     updateDangKySanPham = (e) => {
         e.preventDefault();
-        let danhSachChiTieu = null;
-        this.state.currentDangKySanPham.MaCoSoSanXuat = e.target.cbMaCoSoSanXuat.value;
-        this.state.currentDangKySanPham.TenSanPham = e.target.txtTenSanPham.value;
-        this.state.currentDangKySanPham.MaLoaiSanPham = e.target.cbMaLoaiSanPham.value;
-        this.state.currentDangKySanPham.NgayDangKy = e.target.dpNgayDangKy.value;
-        this.state.currentDangKySanPham.NgayHetHan = e.target.dpNgayHetHan.value;
-        this.state.currentDangKySanPham.MaTieuChuan = e.target.cbMaTieuChuan.value;
 
-        if(this.state.addedDangKySanPhamIndex === this.state.currentDangKySanPhamIndex){
-            //Cập nhật thì lấy dữ liệu từ state currentCoSoSanXuat và từ bảng
-            //
-            danhSachChiTieu = this.state.currentCoSoSanXuat.DanhSachChiTieu;
-
-            this.setState({
-                addedDangKySanPhamUpdated: true
-            });
-        }
-        else
-        {
-            danhSachChiTieu = this.state.currentDangKySanPham.DanhSachChiTieu;
-        }
+        let currentDangKySanPham = this.state.currentDangKySanPham;
+        currentDangKySanPham.MaCoSoSanXuat = e.target.cbMaCoSoSanXuat.value;
+        currentDangKySanPham.TenSanPham = e.target.txtTenSanPham.value;
+        currentDangKySanPham.MaLoaiSanPham = e.target.cbMaLoaiSanPham.value;
+        currentDangKySanPham.NgayDangKy = e.target.dpNgayDangKy.value;
+        currentDangKySanPham.NgayHetHan = e.target.dpNgayHetHan.value;
+        currentDangKySanPham.MaTieuChuan = e.target.cbMaTieuChuan.value;
 
         let upsertable = true;
-
+        let danhSachChiTieu = this.state.currentTieuChuan.DanhSachChiTieu;
+        let chiTieuThucTe =[];
+        let thucTe = null;
         danhSachChiTieu.forEach((item, index) => {
-            item.ThucTe = $("#ThucTeChiTieu_" + index).val();
-            switch (item.LoaiChiTieu){
+            thucTe = $("#ThucTeChiTieu_" + index).val();
+            chiTieuAddable = true;
+            //Kiem tra dieu kien
+            switch (item.LoaiChiTieu    ){
                 case "MT":
-                    item.ThucTe = $("#ThucTeChiTieu_" + index)[0].checked;
-                    if(item.ThucTe !== true){
+                    thucTe = $("#ThucTeChiTieu_" + index)[0].checked;
+                    if(thucTe !== true){
                         this.notify("Sản phẩm không đạt chuẩn chỉ tiêu thứ " + index, "warning");
                         upsertable = false;
                         return;
                     }
                     break;
                 case "NG":
-                    if(item.ThucTe < item.GioiHanDuoi || item.ThucTe > item.GioiHanTren){
+                    if(thucTe < item.GioiHanDuoi || thucTe > item.GioiHanTren){
                         this.notify("Sản phẩm không đạt chuẩn chỉ tiêu thứ " + index, "warning");
                         upsertable = false;
                         return;
                     }
                     break;
                 case "VQ":
-                    if(item.ThucTe < item.GioiHanDuoi){
+                    if(thucTe < item.GioiHanDuoi){
                         this.notify("Sản phẩm không đạt chuẩn chỉ tiêu thứ " + index, "warning");
                         upsertable = false;
                         return;
                     }
                     break;
                 case "KVQ":
-                    if (item.ThucTe > item.GioiHanTren) {
+                    if (thucTe > item.GioiHanTren) {
                         this.notify("Sản phẩm không đạt chuẩn chỉ tiêu thứ " + index, "warning");
                         upsertable = false;
                         return;
@@ -493,10 +486,12 @@ class DangKySanPhamForm extends Component {
                     break;
 
             }
+            //Them vao danh sach
+            chiTieuThucTe.push({MaChiTieu : item.MaTieuChuan, ThucTe: thucTe})
         });
         if(upsertable){
-            this.state.currentDangKySanPham.DanhSachChiTieu = danhSachChiTieu;
-            DangKySanPhamController.upsertDangKySanPham(this.state.currentDangKySanPham);
+            currentDangKySanPham.DanhSachChiTieu = chiTieuThucTe;
+            DangKySanPhamController.upsertDangKySanPham(currentDangKySanPham);
             this.notify("Cập nhật thành công", "success");
         }
     };
@@ -532,8 +527,6 @@ class DangKySanPhamForm extends Component {
             });
         }
     }
-
-
 }
 
 export default DangKySanPhamForm;

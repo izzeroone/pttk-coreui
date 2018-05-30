@@ -34,17 +34,17 @@ class TieuChuanForm extends Component {
 
         this.dummyTieuChuan = {
             TenTieuChuan: "Tên tiêu chuẩn",
-                MaLoaiSanPham: "CH",
-                NgayBatDauHieuLuc: moment("20140202").format("YYYY-MM-DD"),
-                NgayHetHieuLuc: moment("20190202").format("YYYY-MM-DD"),
-                DanhSachChiTieu: [{
+            MaLoaiSanPham: "CH",
+            NgayBatDauHieuLuc: moment("20140202").format("YYYY-MM-DD"),
+            NgayHetHieuLuc: moment("20190202").format("YYYY-MM-DD"),
+            DanhSachChiTieu: [{
                 TenChiTieu: "Tên chỉ tiêu",
                 LoaiChiTieu: "LESS",
                 GioiHanTren: "100",
                 DonVi: "mg/hh",
                 MoTa: "Mô tả chỉ tiêu"
             }],
-                Delete: false
+            Delete: false
         };
 
         this.dummyChiTieu = {
@@ -61,11 +61,13 @@ class TieuChuanForm extends Component {
             addedChiTieuIndex: null,
             addedChiTieuUpdated: true,
             deleteModalShown: false,
+            deleteTieuChuanIndex: false,
             chiTieuModalShown: false,
-            currentCoSoSanXuatIndex: null,
-            currentCoSoSanXuat: null,
+            currentTieuChuanIndex: null,
+            currentTieuChuan: null,
             currentChiTieuIndex: null,
             currentLoaiChiTieu: null,
+            currentDanhSachChiTieu: null,
             danhSachTieuChuan: null,
             danhSachLoaiSanPham: null,
         };
@@ -74,15 +76,15 @@ class TieuChuanForm extends Component {
     componentWillMount = () => {
         Tracker.autorun(() => {
             this.setState({
-                danhSachCoSoSanXuat: DangKySanPhamController.getTatCaTieuChuan(),
-                danhSachLoaiSanPham: DangKySanPhamController.getTatCaLoaiSanPham()
+                danhSachTieuChuan: TieuChuanController.getTatCaTieuChuan(),
+                danhSachLoaiSanPham: TieuChuanController.getTatCaLoaiSanPham()
             })
 
         })
     }
 
     renderDeleteModal = () => {
-        if (this.state.currentCoSoSanXuat === null) {
+        if (this.state.deleteTieuChuanIndex === false) {
             return
         }
 
@@ -90,24 +92,25 @@ class TieuChuanForm extends Component {
             this.setState({deleteModalShown: !this.state.deleteModalShown})
         }
 
+        let deleteTieuChuan = this.state.danhSachTieuChuan[this.state.deleteTieuChuanIndex];
+
         return (<Modal isOpen={this.state.deleteModalShown} toggle={toggleDeleteModal}
                        className={'modal-danger ' + this.props.className}>
             <ModalHeader toggle={this.toggleDanger}>Xác nhận xóa</ModalHeader>
             <ModalBody>
                 Bạn chắc chắn có muốn xóa tiêu
-                chuẩn {this.state.currentCoSoSanXuat.TenTieuChuan}
+                chuẩn {deleteTieuChuan.TenTieuChuan}
             </ModalBody>
             <ModalFooter>
                 <Button color="danger" onClick={() => {
-                    DangKySanPhamController.deleteTieuChuan(this.state.currentCoSoSanXuat._id);
-                    if(this.state.currentCoSoSanXuatIndex === this.state.addedTieuChuanIndex){
+                    TieuChuanController.deleteTieuChuan(deleteTieuChuan._id)
+                    if (this.state.deleteTieuChuanIndex=== this.state.addedTieuChuanIndex) {
                         this.setState({
-                            addedCoSoSanXuatUpdated: true
+                            addedTieuChuanUpdated: true
                         })
                     }
-                    this.setState({currentCoSoSanXuat: null,
-                        currentCoSoSanXuatIndex: null});
-
+                    this.setState({currentTieuChuan: null,
+                        currentTieuChuanIndex: null})
                     toggleDeleteModal()
                 }}>Xóa</Button>{' '}
                 <Button color="secondary" onClick={() => toggleDeleteModal()}>Hủy</Button>
@@ -124,83 +127,83 @@ class TieuChuanForm extends Component {
         return (
             <div>
                 <Label value="Stupid label"/>
-            <Modal isOpen={this.state.chiTieuModalShown} toggle={this.toggleChiTieuModal}
+                <Modal isOpen={this.state.chiTieuModalShown} toggle={this.toggleChiTieuModal}
                        className={'modal-success'} id={"ChiTieuModal"}
-                   onOpened={() => this.selectChiTieu(this.state.currentChiTieuIndex)}>
-            <ModalHeader toggle={this.toggleDanger}>Cập nhật chỉ tiêu</ModalHeader>
-            <ModalBody>
-                <Form action="" method="post" encType="multipart/form-data" className="form-horizontal" onSubmit={this.updateTieuChuan}>
-                    <FormGroup row>
-                        <Col md="3">
-                            <Label htmlFor="text-input">Tên chỉ tiêu</Label>
-                        </Col>
-                        <Col xs="12" md="9">
-                            <Input type="text" id="txtTenChiTieu" name="text-input" ref="txtTenChiTieu"/>
-                            <FormText color="muted">Nhập tên của chỉ tiêu</FormText>
-                        </Col>
-                    </FormGroup>
-                    <FormGroup row>
-                        <Col md="3">
-                            <Label htmlFor="select">Phân loại chỉ tiêu</Label>
-                        </Col>
-                        <Col xs="12" md="9">
-                            <Input type="select" name="select" id="cbLoaiChiTieu" onChange={(e) => {
-                                this.setState({currentCoSoSanXuat: e.target.value})
-                                this.displayRelevantChiTieuInfo(e.target.value)}}>
-                                <option value={"MT"}>Mô tả</option>
-                                <option value={"NG"}>Nằm giữa</option>
-                                <option value={"VQ"}>Vượt quá</option>
-                                <option value={"KVQ"}>Không vượt quá</option>
-                            </Input>
-                        </Col>
-                    </FormGroup>
-                    <FormGroup row id="fgMoTa">
-                        <Col md="3">
-                            <Label htmlFor="date-input">Mô tả</Label>
-                        </Col>
-                        <Col xs="12" md="9">
-                            <Input type="text" id="txtMoTa" name="text-input"/>
-                        </Col>
-                    </FormGroup>
-                   <FormGroup row id="fgGioiHanTren">
-                        <Col md="3">
-                            <Label htmlFor="date-input">Giới hạn trên</Label>
-                        </Col>
-                        <Col xs="12" md="9">
-                            <Input type="number" step="1" id="txtGioiHanTren" name="number-input"/>
-                        </Col>
-                    </FormGroup>
-                    <FormGroup row id="fgGioiHanDuoi">
-                        <Col md="3">
-                            <Label htmlFor="date-input">Giới hạn dưới</Label>
-                        </Col>
-                        <Col xs="12" md="9">
-                            <Input type="number" step="1" id="txtGioiHanDuoi" name="number-input"/>
-                        </Col>
-                    </FormGroup>
-                    <FormGroup row id="fgDonViDo">
-                        <Col md="3">
-                            <Label htmlFor="date-input">Đơn vị đo</Label>
-                        </Col>
-                        <Col xs="12" md="9">
-                            <Input type="text" id="txtDonViDo" name="text-input"/>
-                        </Col>
-                    </FormGroup>
-                    <FormGroup row>
-                        <Col md="3">
-                            <Label htmlFor="date-input">Ghi chú</Label>
-                        </Col>
-                        <Col xs="12" md="9">
-                            <Input type="text" id="txtGhiChu" name="text-input"/>
-                        </Col>
-                    </FormGroup>
-                </Form>
-            </ModalBody>
-            <ModalFooter>
-                <Button color="success" onClick={(e) => {this.updateChiTieu(e); this.toggleChiTieuModal();}}>Cập nhật</Button>
-                <Button color="secondary" onClick={() => this.toggleChiTieuModal()}>Hủy</Button>
-            </ModalFooter>
-        </Modal>
+                       onOpened={() => this.selectChiTieu(this.state.currentChiTieuIndex)}>
+                    <ModalHeader toggle={this.toggleDanger}>Cập nhật chỉ tiêu</ModalHeader>
+                    <ModalBody>
+                        <Form action="" method="post" encType="multipart/form-data" className="form-horizontal" onSubmit={this.updateTieuChuan}>
+                            <FormGroup row>
+                                <Col md="3">
+                                    <Label htmlFor="text-input">Tên chỉ tiêu</Label>
+                                </Col>
+                                <Col xs="12" md="9">
+                                    <Input type="text" id="txtTenChiTieu" name="text-input" ref="txtTenChiTieu"/>
+                                    <FormText color="muted">Nhập tên của chỉ tiêu</FormText>
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row>
+                                <Col md="3">
+                                    <Label htmlFor="select">Phân loại chỉ tiêu</Label>
+                                </Col>
+                                <Col xs="12" md="9">
+                                    <Input type="select" name="select" id="cbLoaiChiTieu" onChange={(e) => {
+                                        this.setState({currentLoaiChiTieu: e.target.value})
+                                        this.displayRelevantChiTieuInfo(e.target.value)}}>
+                                        <option value={"MT"}>Mô tả</option>
+                                        <option value={"NG"}>Nằm giữa</option>
+                                        <option value={"VQ"}>Vượt quá</option>
+                                        <option value={"KVQ"}>Không vượt quá</option>
+                                    </Input>
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row id="fgMoTa">
+                                <Col md="3">
+                                    <Label htmlFor="date-input">Mô tả</Label>
+                                </Col>
+                                <Col xs="12" md="9">
+                                    <Input type="text" id="txtMoTa" name="text-input"/>
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row id="fgGioiHanTren">
+                                <Col md="3">
+                                    <Label htmlFor="date-input">Giới hạn trên</Label>
+                                </Col>
+                                <Col xs="12" md="9">
+                                    <Input type="number" step="1" id="txtGioiHanTren" name="number-input"/>
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row id="fgGioiHanDuoi">
+                                <Col md="3">
+                                    <Label htmlFor="date-input">Giới hạn dưới</Label>
+                                </Col>
+                                <Col xs="12" md="9">
+                                    <Input type="number" step="1" id="txtGioiHanDuoi" name="number-input"/>
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row id="fgDonViDo">
+                                <Col md="3">
+                                    <Label htmlFor="date-input">Đơn vị đo</Label>
+                                </Col>
+                                <Col xs="12" md="9">
+                                    <Input type="text" id="txtDonViDo" name="text-input"/>
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row>
+                                <Col md="3">
+                                    <Label htmlFor="date-input">Ghi chú</Label>
+                                </Col>
+                                <Col xs="12" md="9">
+                                    <Input type="text" id="txtGhiChu" name="text-input"/>
+                                </Col>
+                            </FormGroup>
+                        </Form>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="success" onClick={(e) => {this.updateChiTieu(e); this.toggleChiTieuModal();}}>Cập nhật</Button>
+                        <Button color="secondary" onClick={() => this.toggleChiTieuModal()}>Hủy</Button>
+                    </ModalFooter>
+                </Modal>
             </div>)
 
     }
@@ -210,8 +213,7 @@ class TieuChuanForm extends Component {
         let shownDeleteModal = (index) => {
             this.setState({
                 deleteModalShown: !this.state.deleteModalShown,
-                currentCoSoSanXuatIndex: index,
-                currentCoSoSanXuat: this.state.danhSachTieuChuan[index]
+                deleteTieuChuanIndex: index,
             })
         };
         if (this.state.danhSachTieuChuan && this.state.danhSachTieuChuan.length != 0) {
@@ -219,7 +221,7 @@ class TieuChuanForm extends Component {
                 return (
                     <tr key={index}>
                         <td>{item.TenTieuChuan}</td>
-                        <td>{DangKySanPhamController.getTenSanPham(item.MaLoaiSanPham).TenLoaiSanPham}</td>
+                        <td>{TieuChuanController.getTenSanPham(item.MaLoaiSanPham).TenLoaiSanPham}</td>
                         <td>
                             {(moment().isBefore(item.NgayBatDauHieuLuc)) ?
                                 <Badge className="mr-1" color="warning" pill>Chưa hiệu lực</Badge> :
@@ -254,7 +256,7 @@ class TieuChuanForm extends Component {
     }
 
     renderTieuChuan = () => {
-        if (this.state.currentCoSoSanXuat === null) {
+        if (this.state.currentTieuChuan === null) {
             return (
                 <Card>
                     <CardHeader>
@@ -266,7 +268,7 @@ class TieuChuanForm extends Component {
                 </Card>
             )
         }
-        let TieuChuan = this.state.currentCoSoSanXuat;
+        let TieuChuan = this.state.currentTieuChuan;
         return (
             <Card>
                 <CardHeader>
@@ -289,8 +291,7 @@ class TieuChuanForm extends Component {
                                 <Label htmlFor="text-input">Tên tiêu chuẩn</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="text" id="txtTenTieuChuan" name="text-input" placeholder="Text"
-                                       defaultValue={TieuChuan.TenTieuChuan}/>
+                                <Input type="text" id="txtTenTieuChuan" name="text-input"/>
                                 <FormText color="muted">Nhập tên của tiêu chuẩn</FormText>
                             </Col>
                         </FormGroup>
@@ -299,7 +300,7 @@ class TieuChuanForm extends Component {
                                 <Label htmlFor="select">Loại sản phẩm</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="select" name="select" id="cbMaLoaiSanPham" defaultValue={TieuChuan.MaLoaiSanPham}>
+                                <Input type="select" name="select" id="cbMaLoaiSanPham">
                                     {this.renderDanhSachLoaiSanPham()}
                                 </Input>
                             </Col>
@@ -309,8 +310,7 @@ class TieuChuanForm extends Component {
                                 <Label htmlFor="date-input">Ngày bắt đầu hiệu lực </Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="date" id="dpNgayBatDauHieuLuc" name="date-input" placeholder="date"
-                                       defaultValue={TieuChuan.NgayBatDauHieuLuc}/>
+                                <Input type="date" id="dpNgayBatDauHieuLuc" name="date-input"/>
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -318,8 +318,7 @@ class TieuChuanForm extends Component {
                                 <Label htmlFor="date-input">Ngày hết hiệu lực</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="date" id="dpNgayHetHieuLuc" name="date-input" placeholder="date"
-                                       defaultValue={TieuChuan.NgayHetHieuLuc}/>
+                                <Input type="date" id="dpNgayHetHieuLuc" name="date-input"/>
                             </Col>
                         </FormGroup>
                         <FormGroup>
@@ -345,7 +344,7 @@ class TieuChuanForm extends Component {
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {this.renderDanhSachChiTieu(TieuChuan.DanhSachChiTieu)}
+                                        {this.renderDanhSachChiTieu()}
                                         </tbody>
                                     </Table>
                                 </CardBody>
@@ -363,7 +362,8 @@ class TieuChuanForm extends Component {
             </Card>)
     }
 
-    renderDanhSachChiTieu = (danhSachChiTieu) => {
+    renderDanhSachChiTieu = () => {
+        let danhSachChiTieu = this.state.currentDanhSachChiTieu;
         if (Array.isArray(danhSachChiTieu)) {
             return danhSachChiTieu.map((item, index) => {
                 let TenLoaiChiTieu = null;
@@ -402,15 +402,15 @@ class TieuChuanForm extends Component {
                             <Button size="sm" color="primary" className="btn-pill"
                                     onClick={() => {
                                         this.setState({
-                                        currentCoSoSanXuatIndex: index,
-                                        chiTieuModalShown: true
-                                    })
+                                            currentChiTieuIndex: index,
+                                            chiTieuModalShown: true
+                                        })
                                     }}><span
                                 style={{fontSize: "4"}}>Sửa</span></Button>
                             <Button size="sm" color="danger" className="btn-pill"
-                            onClick={() => {
-                                this.state.currentCoSoSanXuat.DanhSachChiTieu.splice(index, 1);
-                                this.forceUpdate()}}><span
+                                    onClick={() => {
+                                        this.state.currentTieuChuan.DanhSachChiTieu.splice(index, 1);
+                                        this.forceUpdate()}}><span
                                 style={{fontSize: "4"}}>Xóa</span></Button>
                         </td>
                     </tr>
@@ -467,8 +467,9 @@ class TieuChuanForm extends Component {
     selectTieuChuan = (index) => {
         let modifiedTieuChuan = this.state.danhSachTieuChuan[index];
         this.setState({
-            currentCoSoSanXuatIndex: index,
-            currentCoSoSanXuat: modifiedTieuChuan
+            currentTieuChuanIndex: index,
+            currentTieuChuan: lodash.cloneDeep(modifiedTieuChuan),
+            currentDanhSachChiTieu: lodash.cloneDeep(modifiedTieuChuan.DanhSachChiTieu)
         });
         console.log(`Tien chuan thu ${index} da duoc chon`);
         $("#txtTenTieuChuan").val(modifiedTieuChuan.TenTieuChuan);
@@ -479,9 +480,10 @@ class TieuChuanForm extends Component {
 
     selectChiTieu = (index) => {
         console.log(`Chi tieu thu ${index} da duoc chon`);
-        let currentChiTieu = this.state.currentCoSoSanXuat.DanhSachChiTieu[index];
+        let currentChiTieu = this.state.currentDanhSachChiTieu[index];
         this.setState({
-            currentCoSoSanXuat: currentChiTieu.LoaiChiTieu
+            currentLoaiChiTieu: currentChiTieu.LoaiChiTieu,
+            currentChiTieuIndex: index
         });
         //Get element render before dom
         this.displayRelevantChiTieuInfo(currentChiTieu.LoaiChiTieu);
@@ -532,13 +534,13 @@ class TieuChuanForm extends Component {
             return;
         }
         this.setState({
-            addedCoSoSanXuatUpdated: false,
-            addedCoSoSanXuatIndex: this.state.danhSachTieuChuan.length
+            addedTieuChuanUpdated: false,
+            addedTieuChuanIndex: this.state.danhSachTieuChuan.length
         });
-        console.log(DangKySanPhamController.addTieuChuan(this.dummyTieuChuan));
+        console.log(TieuChuanController.addTieuChuan(this.dummyTieuChuan));
     }
 
-    notify = (message, type) => {
+    notify(message, type) {
         this.refs.notify.notificationAlert({
             place: 'br',
             message: message,
@@ -551,14 +553,14 @@ class TieuChuanForm extends Component {
     addChiTieu = () => {
         //Thêm mới mà chưa cập nhật thì ko cho thêm
         if (this.state.addedChiTieuUpdated === false) {
-            this.notify("Bạn chưa cập nhật chỉ tiêu mới thêm", "warning")
+            this.notify("Bạn chưa cập nhật chỉ tiêu mới thêm", "warning");
             return;
         }
         this.setState({
             addedChiTieuUpdated: false,
-            addedChiTieuIndex: this.state.currentCoSoSanXuat.DanhSachChiTieu.length
+            addedChiTieuIndex: this.state.currentTieuChuan.DanhSachChiTieu.length
         });
-        this.state.currentCoSoSanXuat.DanhSachChiTieu.push(this.dummyChiTieu);
+        this.state.currentDanhSachChiTieu.push(this.dummyChiTieu);
     };
 
     updateChiTieu = (e) => {
@@ -570,50 +572,37 @@ class TieuChuanForm extends Component {
         ChiTieu.GioiHanTren = $("#txtGioiHanTren").val();
         ChiTieu.GioiHanDuoi = $("#txtGioiHanDuoi").val();
         ChiTieu.DonViDo = $("#txtDonViDo").val();
-        // switch (ChiTieu.LoaiChiTieu) {
-        //     case "MT":
-        //         ChiTieu.MoTa = $("#txtMoTa").val();
-        //         break;
-        //     case "NG:":
-        //         ChiTieu.GioiHanTren = $("#txtGioiHanTren").val();
-        //         ChiTieu.GioiHanDuoi = $("#txtGioiHanDuoi").val();
-        //         ChiTieu.DonViDo = $("#txtDonViDo").val();
-        //         break;
-        //     case "KVQ":
-        //         ChiTieu.GioiHanTren = $("#txtGioiHanTren").val();
-        //         ChiTieu.DonViDo = $("#txtDonViDo").val();
-        //         break;
-        //     case "VQ":
-        //         ChiTieu.GioiHanDuoi = $("#txtGioiHanDuoi").val();
-        //         ChiTieu.DonViDo = $("#txtDonViDo").val();
-        //         break;
-        // }
-        let currentTieuChuan = this.state.currentCoSoSanXuat;
-        currentTieuChuan.DanhSachChiTieu[this.state.currentChiTieuIndex] = ChiTieu;
+
+        let danhSachChiTieu = this.state.currentDanhSachChiTieu;
+        danhSachChiTieu[this.state.currentChiTieuIndex] = ChiTieu;
         this.setState({
-            currentCoSoSanXuat : currentTieuChuan
+            currentDanhSachChiTieu : danhSachChiTieu
         })
-        console.log(this.state.currentCoSoSanXuat);
     }
 
     updateTieuChuan = (e) => {
         e.preventDefault();
-        this.state.currentCoSoSanXuat.TenTieuChuan = e.target.txtTenTieuChuan.value;
-        this.state.currentCoSoSanXuat.MaLoaiSanPham = e.target.cbMaLoaiSanPham.value;
-        this.state.currentCoSoSanXuat.NgayBatDauHieuLuc = e.target.dpNgayBatDauHieuLuc.value;
-        this.state.currentCoSoSanXuat.NgayHetHieuLuc = e.target.dpNgayHetHieuLuc.value;
-        if(this.state.addedTieuChuanIndex === this.state.currentCoSoSanXuatIndex){
+
+        let currentTieuChuan = this.state.currentTieuChuan;
+
+        currentTieuChuan.TenTieuChuan = e.target.txtTenTieuChuan.value;
+        currentTieuChuan.MaLoaiSanPham = e.target.cbMaLoaiSanPham.value;
+        currentTieuChuan.NgayBatDauHieuLuc = e.target.dpNgayBatDauHieuLuc.value;
+        currentTieuChuan.NgayHetHieuLuc = e.target.dpNgayHetHieuLuc.value;
+        currentTieuChuan.DanhSachChiTieu = this.state.currentDanhSachChiTieu;
+
+        if(this.state.addedTieuChuanIndex === this.state.currentTieuChuanIndex){
             this.setState({
-                addedCoSoSanXuatUpdated: true
+                addedTieuChuanUpdated: true
             });
         }
-        DangKySanPhamController.upsertTieuChuan(this.state.currentCoSoSanXuat);
+        TieuChuanController.upsertTieuChuan(this.state.currentTieuChuan);
         this.notify("Cập nhật thành công", "success");
     };
 
 
     resetCurrentTieuChuan = () => {
-        this.selectTieuChuan(this.state.currentCoSoSanXuatIndex);
+        this.selectTieuChuan(this.state.currentTieuChuanIndex);
     };
 
     resetCurrentChiTieu = () => {

@@ -10,8 +10,8 @@ class Controller {
     upsertCoSoSanXuat(CoSoSanXuat){
         return CoSoSanXuatDB.upsert(CoSoSanXuat._id, CoSoSanXuat);
     }
-    deleteCoSoSanXuat(CoSoSanXuat) {
-        return CoSoSanXuatDB.update(CoSoSanXuat._id, {Delete: true});
+    deleteCoSoSanXuat(MaCoSoSanXuat) {
+        return CoSoSanXuatDB.update(MaCoSoSanXuat, {Delete: true});
     }
     getAllLoaiSanPham(){
         return LoaiSanPhamDB.find({Delete: false}).fetch();

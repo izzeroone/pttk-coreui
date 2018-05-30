@@ -2,7 +2,6 @@ import {TieuChuanDB, LoaiSanPhamDB, LoaiChiTieuDB} from "../../../collections/co
 import TieuChuanForm from "./TieuChuanForm";
 
 class Controller {
-    x = 123;
     getTatCaTieuChuan = () => {
         return TieuChuanDB.find({Delete: false}).fetch();
     }
@@ -15,8 +14,8 @@ class Controller {
     getTatCaLoaiSanPham = () => {
         return LoaiSanPhamDB.find({Delete: false}).fetch();
     }
-    getTenSanPham = (MaSanPham) => {
-        return LoaiSanPhamDB.findOne(MaSanPham);
+    getTenSanPham = (MaLoaiSanPham) => {
+        return LoaiSanPhamDB.findOne(MaLoaiSanPham);
     }
     deleteTieuChuan = (MaTieuChuan) => {
         TieuChuanDB.update(MaTieuChuan, {Delete: true});
@@ -29,4 +28,4 @@ class Controller {
     }
 }
 
-export default DangKySanPhamController = new Controller();
+export default TieuChuanController = new Controller();
