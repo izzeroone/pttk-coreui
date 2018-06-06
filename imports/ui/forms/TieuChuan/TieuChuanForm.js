@@ -221,7 +221,8 @@ class TieuChuanForm extends Component {
                 return (
                     <tr key={index}>
                         <td>{item.TenTieuChuan}</td>
-                        <td>{TieuChuanController.getTenSanPham(item.MaLoaiSanPham).TenLoaiSanPham}</td>
+                        <td>{TieuChuanController.getTenSanPham(item.MaLoaiSanPham) !== undefined ?
+                            TieuChuanController.getTenSanPham(item.MaLoaiSanPham) .TenLoaiSanPham : ""}</td>
                         <td>
                             {(moment().isBefore(item.NgayBatDauHieuLuc)) ?
                                 <Badge className="mr-1" color="warning" pill>Chưa hiệu lực</Badge> :
@@ -469,7 +470,10 @@ class TieuChuanForm extends Component {
         this.setState({
             currentTieuChuanIndex: index,
             currentTieuChuan: lodash.cloneDeep(modifiedTieuChuan),
-            currentDanhSachChiTieu: lodash.cloneDeep(modifiedTieuChuan.DanhSachChiTieu)
+            currentDanhSachChiTieu: lodash.cloneDeep(modifiedTieuChuan.DanhSachChiTieu),
+            currentChiTieuIndex : null,
+            addedChiTieuUpdated : true,
+            addedChiTieuIndex : null
         });
         console.log(`Tien chuan thu ${index} da duoc chon`);
         $("#txtTenTieuChuan").val(modifiedTieuChuan.TenTieuChuan);
@@ -552,10 +556,10 @@ class TieuChuanForm extends Component {
 
     addChiTieu = () => {
         //Thêm mới mà chưa cập nhật thì ko cho thêm
-        if (this.state.addedChiTieuUpdated === false) {
-            this.notify("Bạn chưa cập nhật chỉ tiêu mới thêm", "warning");
-            return;
-        }
+        // if (this.state.addedChiTieuUpdated === false) {
+        //     this.notify("Bạn chưa cập nhật chỉ tiêu mới thêm", "warning");
+        //     return;
+        // }
         this.setState({
             addedChiTieuUpdated: false,
             addedChiTieuIndex: this.state.currentTieuChuan.DanhSachChiTieu.length

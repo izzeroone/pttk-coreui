@@ -101,7 +101,8 @@ class CoSoSanXuatForm extends Component {
                         })}
                         </td>
                         <td>{item.DanhSachMaLoaiSanPham.map((maloaisanpham, mlspindex) => {
-                            return <p key={mlspindex}>{CoSoSanXuatController.getLoaiSanPham(maloaisanpham).TenLoaiSanPham}</p>})}
+                            return <p key={mlspindex}>{CoSoSanXuatController.getLoaiSanPham(maloaisanpham) !== undefined ? 
+                                CoSoSanXuatController.getLoaiSanPham(maloaisanpham).TenLoaiSanPham : ""}</p>})}
                         </td>
                         <td>
                             <Button size="sm" color="primary" className="btn-pill"
@@ -121,6 +122,9 @@ class CoSoSanXuatForm extends Component {
     }
     renderDanhSachLoaiSanPham = () => {
         var result = [];
+        if(this.state.danhSachLoaiSanPham === undefined){
+            return result;
+        }
         this.state.danhSachLoaiSanPham.forEach((item, index) => {
             result.push({value: item._id, label: item.TenLoaiSanPham})
         });
@@ -162,10 +166,7 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="text-input">Tên cơ sỏ sản xuất</Label>
                             </Col>
                         <Col xs="12" md="9">
-                            <Input type="text" id="txtTenCoSoSanXuat" name="text-input" onChange={(e) => {
-                                       currentCoSoSanXuat = this.state.currentCoSoSanXuat;
-                                       currentCoSoSanXuat.TenCoSoSanXuat = e.target.value;
-                                       this.setState(currentCoSoSanXuat)}}/>
+                            <Input type="text" id="txtTenCoSoSanXuat" name="text-input"/>
                         </Col>
                     </FormGroup>
                         <FormGroup row>
@@ -173,11 +174,7 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="text-input">Chủ cơ sở</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="text" id="txtChuCoSo" name="text-input"
-                                       onChange={(e) => {
-                                           currentCoSoSanXuat = this.state.currentCoSoSanXuat;
-                                           currentCoSoSanXuat.ChuCoSo = e.target.value;
-                                           this.setState(currentCoSoSanXuat)}}/>
+                                <Input type="text" id="txtChuCoSo" name="text-input"/>
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -185,11 +182,7 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="text-input">Địa chỉ</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="text" id="txtDiaChi" name="text-input" placeholder="Text"
-                                       onChange={(e) => {
-                                           currentCoSoSanXuat = this.state.currentCoSoSanXuat;
-                                           currentCoSoSanXuat.DiaChi = e.target.value;
-                                           this.setState(currentCoSoSanXuat)}}/>
+                                <Input type="text" id="txtDiaChi" name="text-input"/>
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -197,11 +190,7 @@ class CoSoSanXuatForm extends Component {
                                 <Label htmlFor="text-input">Số điện thoại</Label>
                             </Col>
                             <Col xs="12" md="9">
-                                <Input type="text" id="txtSoDienThoai" name="text-input"
-                                       onChange={(e) => {
-                                           currentCoSoSanXuat = this.state.currentCoSoSanXuat;
-                                           currentCoSoSanXuat.DanhSachSoDienThoai = [e.target.value];
-                                           this.setState(currentCoSoSanXuat)}}/>
+                                <Input type="text" id="txtSoDienThoai" name="text-input"/>
                             </Col>
                         </FormGroup>
                         <FormGroup row>
@@ -215,9 +204,11 @@ class CoSoSanXuatForm extends Component {
                                             value.forEach((item, index) => {
                                                 DanhSachMaSanPham.push(item.value)
                                             });
-                                            currentCoSoSanXuat = this.state.currentCoSoSanXuat;
-                                            currentCoSoSanXuat.DanhSachMaLoaiSanPham = DanhSachMaSanPham;
-                                            this.setState(currentCoSoSanXuat)}}/>
+                                            let currentCoSoSanXuat = this.state.currentCoSoSanXuat;
+                                            if(currentCoSoSanXuat !== undefined){
+                                                currentCoSoSanXuat.DanhSachMaLoaiSanPham = DanhSachMaSanPham;
+                                                  this.setState(currentCoSoSanXuat)}}
+                                            }/>
                             </Col>
                         </FormGroup>
                         <Button type="submit" size="sm" color="primary"><i
@@ -234,6 +225,9 @@ class CoSoSanXuatForm extends Component {
 
     selectCoSoSanXuat = (index) => {
         let currentCoSoSanXuat = this.state.danhSachCoSoSanXuat[index];
+        // if(currentCoSoSanXuat === undefined){
+        //     return;
+        // }
         this.setState({
             currentCoSoSanXuatIndex: index,
             currentCoSoSanXuat: lodash.cloneDeep(currentCoSoSanXuat)
@@ -268,17 +262,40 @@ class CoSoSanXuatForm extends Component {
     }
     updateCoSoSanXuat = (e) => {
         e.preventDefault();
+        let currentCoSoSanXuat = this.state.currentCoSoSanXuat;
+        currentCoSoSanXuat.TenCoSoSanXuat = $("#txtTenCoSoSanXuat").val();
+        currentCoSoSanXuat.ChuCoSo = $("#txtChuCoSo").val();
+        currentCoSoSanXuat.DiaChi = $("#txtDiaChi").val();
+        currentCoSoSanXuat.DanhSachSoDienThoai = [$("#txtSoDienThoai").val()];
+
+        if(!this.validateCoSoSanXuat(currentCoSoSanXuat)){
+            return;
+        }
+
 
         if (this.state.addedCoSoSanXuatIndex === this.state.currentCoSoSanXuatIndex) {
             this.setState({
                 addedCoSoSanXuatUpdated: true
             });
         }
-        CoSoSanXuatController.upsertCoSoSanXuat(this.state.currentCoSoSanXuat);
+        CoSoSanXuatController.upsertCoSoSanXuat(currentCoSoSanXuat);
         this.notify("Cập nhật thành công", "success");
     };
+
+    validateCoSoSanXuat = (coSoSanXuat) => {
+        if(coSoSanXuat.TenCoSoSanXuat === "" || 
+        coSoSanXuat.ChuCoSo === "" ||
+        coSoSanXuat.DiaChi === "" ||
+        coSoSanXuat.DanhSachSoDienThoai[0] === "" ||
+        coSoSanXuat.DanhSachMaLoaiSanPham.length === 0){
+            this.notify("Thông tin không hợp lệ. ")
+            return false;
+        }
+
+        return true;
+    }
+    
     resetCurrentCoSoSanXuat = () => {
-        this.selectCoSoSanXuat(this.state.currentCoSoSanXuatIndex);
         this.selectCoSoSanXuat(this.state.currentCoSoSanXuatIndex);
     };
 
@@ -286,11 +303,11 @@ class CoSoSanXuatForm extends Component {
         super(props);
 
         this.dummyCoSoSanXuat = {
-            TenCoSoSanXuat: "Cơ sở sản xuất",
-            ChuCoSo: "Nguyen Van A",
-            DiaChi: "24 Pham Van Dong",
-            DanhSachSoDienThoai: ["1212312", "23432312321"],
-            DanhSachMaLoaiSanPham: ["CH", "CV"],
+            TenCoSoSanXuat: "",
+            ChuCoSo: "",
+            DiaChi: "",
+            DanhSachSoDienThoai: [],
+            DanhSachMaLoaiSanPham: [],
             Delete: false
         };
 

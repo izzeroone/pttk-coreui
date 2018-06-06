@@ -33,13 +33,12 @@ class DangKySanPhamForm extends Component {
         super(props);
 
         this.dummyDangKySanPham = {
-            MaCoSoSanXuat : "ABCXYZ",
-            TenSanPham: "Cá hộp Bacasa 100g/l",
+            MaCoSoSanXuat : "",
+            TenSanPham: "",
             MaLoaiSanPham: "CH",
             NgayDangKy: moment().format("YYYY-MM-DD"),
             NgayHetHan: moment().format("YYYY-MM-DD"),
-            SoLuongDangKy: 1122,
-            MaTieuChuan : "ABCXYZ",
+            SoLuongDangKy: 0,
             Delete: false
         };
 
@@ -71,7 +70,7 @@ class DangKySanPhamForm extends Component {
     }
 
     renderDeleteModal = () => {
-        if (this.state.currentDangKySanPham === null) {
+        if (this.state.currentDangKySanPham === null || this.state.currentDangKySanPham === undefined ) {
             return
         }
 
@@ -116,7 +115,8 @@ class DangKySanPhamForm extends Component {
             return this.state.danhSachDangKySanPham.map((item, index) => {
                 return (
                     <tr key={index}>
-                        <td>{DangKySanPhamController.getCoSoSanXuat(item.MaCoSoSanXuat).TenCoSoSanXuat}</td>
+                        <td>{DangKySanPhamController.getCoSoSanXuat(item.MaCoSoSanXuat) !== undefined ?
+                            DangKySanPhamController.getCoSoSanXuat(item.MaCoSoSanXuat).TenCoSoSanXuat : ""}</td>
                         <td>{item.TenSanPham}</td>
                         <td>
                             {(moment().isBefore(item.NgayDangKy)) ?
@@ -144,9 +144,21 @@ class DangKySanPhamForm extends Component {
     }
 
     renderDanhSachLoaiSanPham = () => {
-        if (this.state.danhSachLoaiSanPham) {
+        if (this.state.currentDangKySanPham && this.state.currentDangKySanPham.MaCoSoSanXuat && this.state.danhSachLoaiSanPham) {
+            let coSoSanXuat = this.state.danhSachCoSoSanXuat.find((item) => {
+                return item._id === this.state.currentDangKySanPham.MaCoSoSanXuat;
+            })
+            //Khong tim ra thi return
+            if(coSoSanXuat === undefined){
+                return;
+            }
+
             return this.state.danhSachLoaiSanPham.map((item, index) => {
-                return (<option value={item._id} key={item._id}>{item.TenLoaiSanPham}</option>)
+                if (coSoSanXuat.DanhSachMaLoaiSanPham.find((maLoaiSanPham) =>{
+                    return maLoaiSanPham === item._id
+                })){
+                    return (<option value={item._id} key={item._id}>{item.TenLoaiSanPham}</option>)
+                }
             });
         }
     }
@@ -274,8 +286,10 @@ class DangKySanPhamForm extends Component {
     }
 
     renderDanhSachChiTieu = () => {
-        //San pham moi thi dung chi tieu hien hanh
-        let isNewSanPham = this.state.addedDangKySanPhamIndex === this.state.currentDangKySanPhamIndex;
+        //Chua co chi tieu thi khong co chon]
+        if(this.state.currentTieuChuan === null || this.state.currentTieuChuan === undefined){
+            return;
+        }
         let danhSachChiTieu = this.state.currentTieuChuan.DanhSachChiTieu;
         let chiTieuThucTe = this.state.currentDangKySanPham.DanhSachChiTieu;
         if (Array.isArray(danhSachChiTieu)) {
@@ -314,10 +328,10 @@ class DangKySanPhamForm extends Component {
                         <td>{item.GhiChu}</td>
                         <td>
                             {item.LoaiChiTieu != "MT" ?
-                                <Input id ={"ThucTeChiTieu_" + index} type="number" defaultValue={chiTieuThucTe[index].ThucTe}/>
+                                <Input id ={"ThucTeChiTieu_" + index} type="number" defaultValue={chiTieuThucTe[index] !== undefined ? chiTieuThucTe[index].ThucTe : null}/>
                                 :
                                 <p>
-                                    <Input id ={"ThucTeChiTieu_" + index} type="checkbox" defaultValue={chiTieuThucTe[index].ThucTe}/>
+                                    <Input id ={"ThucTeChiTieu_" + index} type="checkbox" defaultValue={chiTieuThucTe[index] !== undefined ? chiTieuThucTe[index].ThucTe : null}/>
                                     <p>Đạt</p>
                                 </p>
                             }
@@ -374,9 +388,18 @@ class DangKySanPhamForm extends Component {
 
     selectDangKySanPham = (index) => {
         let currentDangKySanPham = this.state.danhSachDangKySanPham[index];
+
+        if(currentDangKySanPham === undefined){
+            return;
+        }
+
         let currentTieuChuan = this.state.danhSachTieuChuan.find(tieuChuan => {
-            return tieuChuan._id = currentDangKySanPham.MaTieuChuan
+            return tieuChuan._id === currentDangKySanPham.MaTieuChuan
         });
+
+        if(currentTieuChuan === undefined){
+            return;
+        }
 
         this.setState({
             currentDangKySanPhamIndex: index,
@@ -399,6 +422,11 @@ class DangKySanPhamForm extends Component {
     selectChiTieu = (index) => {
         console.log(`Chi tieu thu ${index} da duoc chon`);
         let currentChiTieu = this.state.currentChiTieu.DanhSachChiTieu[index];
+
+        if(currentChiTieu === undefined){
+            return;
+        }
+
         this.setState({
             currentChiTieu: currentChiTieu.LoaiChiTieu
         });
@@ -452,7 +480,7 @@ class DangKySanPhamForm extends Component {
         let thucTe = null;
         danhSachChiTieu.forEach((item, index) => {
             thucTe = $("#ThucTeChiTieu_" + index).val();
-            chiTieuAddable = true;
+            let chiTieuAddable = true;
             //Kiem tra dieu kien
             switch (item.LoaiChiTieu    ){
                 case "MT":
@@ -521,9 +549,11 @@ class DangKySanPhamForm extends Component {
     }
 
     renderDanhSachTieuChuan = () => {
-        if (this.state.danhSachTieuChuan) {
+        if (this.state.currentDangKySanPham && this.state.currentDangKySanPham.MaTieuChuan && this.state.danhSachTieuChuan) {
             return this.state.danhSachTieuChuan.map((item, index) => {
-                return (<option value={item._id} key={item._id}>{item.TenTieuChuan}</option>)
+                if(item._id === this.state.currentDangKySanPham.MaTieuChuan){
+                    return (<option value={item._id} key={item._id}>{item.TenTieuChuan}</option>)
+                }
             });
         }
     }
